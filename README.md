@@ -6,18 +6,25 @@
 
 <p align="center">记录阅读、影视与旅途的 Flutter 移动应用</p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white" alt="Flutter">
+  <img src="https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white" alt="Dart">
+  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white" alt="Android">
+  <img src="https://img.shields.io/badge/License-MIT-111111" alt="MIT License">
+</p>
+
 ## 项目简介
 
 归途是一款以个人记录为核心的 Android App，用于整理读过的书、看过的影视作品和去过的地点。项目采用本地优先设计，不需要注册账号，也不依赖远程业务服务。
 
-这是我的首个完整 Flutter 开源练习项目，重点实践移动端界面、状态管理、本地持久化、数据统计、自定义绘制和 Android 打包流程。
+这是我的首个完整 Flutter 练习项目，重点实践移动端界面、状态管理、本地持久化、数据统计、自定义绘制和 Android 打包流程。公开源码仓库不包含第三方地图数据，完整安装包内置地图以保证应用体验。
 
 ## 项目特点
 
 - 中文界面，面向个人日常记录场景。
 - 阅读、影视和旅途数据集中管理。
 - 数据默认保存在本机，不要求登录或上传云端。
-- 使用自定义绘制完成统计图表与省级足迹地图。
+- 使用自定义绘制完成统计图表与省级足迹地图，发布安装包内置地图数据以保证旅途页正常展示。
 - 同时支持浅色模式、深色模式和 JSON 数据备份。
 
 ## 界面预览
@@ -59,13 +66,19 @@ lib/
 └─ ui/                        # 表单、图表和地图绘制
 
 assets/
-├─ data/                      # 私有地图数据说明
+├─ data/                      # 私有地图数据说明，公开源码不包含 GeoJSON
 └─ images/                    # App 图标
 
 docs/screenshots/             # README 界面截图
 test/                         # Widget 与地图数据测试
 android/                      # Android 原生工程
 ```
+
+## 下载体验
+
+Android 安装包可在仓库的 [Releases](https://github.com/SySH-7/guitu/releases) 页面下载。当前完整安装包内置地图数据，安装后旅途页可以正常显示省级足迹地图。
+
+源码仓库不包含第三方 GeoJSON。使用源码自行运行时，如未在 `assets/data/` 中配置兼容地图数据，旅途页会显示“地图数据未配置”，阅读、影视、统计、导入导出等其他功能不受影响。
 
 ## 本地运行
 
@@ -83,7 +96,7 @@ flutter run
 
 使用 VS Code 时，安装 Flutter 扩展，启动 Android 模拟器或连接手机，然后打开 `lib/main.dart` 并按 `F5`。
 
-公开仓库不包含第三方 GeoJSON。未配置地图数据时，其他功能仍可正常运行，旅途页会显示“地图数据未配置”。
+公开源码不包含第三方 GeoJSON。使用源码自行运行时，如未在 `assets/data/` 中配置兼容地图数据，其他功能仍可正常运行，旅途页会显示“地图数据未配置”。项目发布的完整安装包会内置地图数据，用于保证应用内省级足迹地图正常展示。
 
 ## 测试
 
@@ -133,9 +146,9 @@ build/app/outputs/flutter-apk/
 
 ## 地图与第三方数据说明
 
-出于第三方数据授权与地图合规考虑，公开仓库及公开 APK 不包含 `china_provinces.geojson`。本地私有开发时可自行在 `assets/data/` 中配置兼容的 GeoJSON，相关说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+出于第三方数据授权与地图合规考虑，公开源码仓库不包含 `china_provinces.geojson`。发布安装包可在不公开源数据文件的前提下内置地图数据，用于保证应用内省级足迹地图正常展示。本地私有开发时可自行在 `assets/data/` 中配置兼容的 GeoJSON，相关说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
-本项目属于个人学习与技术展示作品，不是官方地图产品，也不提供导航、定位或互联网地图服务。免责声明不能替代法律法规要求；公开传播地图数据、二次发布含地图的构建或商业使用前，使用者应自行确认地图审核、数据授权和其他合规要求。
+本项目属于个人学习与技术展示作品，不是官方地图产品，也不提供导航、定位或互联网地图服务。源码仓库中的地图绘制代码只做屏幕适配所需的等比例渲染，不修改原始地图数据文件。免责声明不能替代法律法规要求；公开传播地图数据、二次发布含地图的构建或商业使用前，使用者应自行确认地图审核、数据授权和其他合规要求。
 
 ## 开源许可
 
