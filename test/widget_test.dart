@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:archive_journey/main.dart';
+import 'package:guitu/main.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

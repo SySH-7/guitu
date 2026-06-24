@@ -1,4 +1,4 @@
-name: archive_journey
+name: guitu
 description: "归途 - 记录阅读、影视与旅途的 Flutter app."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.

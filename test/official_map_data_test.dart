@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:archive_journey/ui/map_painter.dart';
+import 'package:guitu/ui/map_painter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
