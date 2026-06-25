@@ -91,6 +91,22 @@ class ArchiveShell extends StatefulWidget {
 class _ArchiveShellState extends State<ArchiveShell> {
   int _index = 0;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_preloadMapDataSafely());
+    });
+  }
+
+  Future<void> _preloadMapDataSafely() async {
+    try {
+      await preloadChinaGeoData();
+    } catch (_) {
+      // The public source tree intentionally omits the private map asset.
+    }
+  }
+
   Future<void> _openAddFlow() async {
     final ArchiveKind? kind = await showArchiveKindChooser(context);
     if (!mounted || kind == null) {

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:guitu/ui/map_painter.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -98,5 +99,30 @@ void main() {
 
     expect(displayedLines, hasLength(southChinaSeaDashCount));
     expect(displayedLines.last.first.dy, 12);
+  });
+
+  test('地图投影在不同容器尺寸下保持经纬比例不变', () {
+    const Rect chinaBounds = Rect.fromLTRB(
+      73.498962,
+      3.408477,
+      135.087387,
+      53.558498,
+    );
+    final double sourceAspect = chinaBounds.width / chinaBounds.height;
+
+    for (final Size size in <Size>[
+      const Size(320, 260),
+      const Size(500, 320),
+      const Size(280, 520),
+    ]) {
+      final Rect projected = projectedMapBoundsForTesting(chinaBounds, size);
+      final double projectedAspect = projected.width / projected.height;
+
+      expect(projectedAspect, closeTo(sourceAspect, 0.0000001));
+      expect(projected.left, greaterThanOrEqualTo(0));
+      expect(projected.top, greaterThanOrEqualTo(0));
+      expect(projected.right, lessThanOrEqualTo(size.width));
+      expect(projected.bottom, lessThanOrEqualTo(size.height));
+    }
   });
 }

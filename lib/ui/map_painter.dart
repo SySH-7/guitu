@@ -6,6 +6,15 @@ import 'package:flutter/services.dart';
 
 const String southChinaSeaBoundaryGb = '156990000';
 const int southChinaSeaDashCount = 9;
+const double defaultChinaMapAspectRatio = 1.2280837330058147;
+const double _mapPadding = 8;
+const double _provinceStrokeWidth = 0.72;
+
+Future<GeoChinaData>? _cachedChinaGeoData;
+
+Future<GeoChinaData> preloadChinaGeoData() {
+  return _cachedChinaGeoData ??= _loadChinaGeoData();
+}
 
 class GeoProvince {
   const GeoProvince({
@@ -37,6 +46,56 @@ class GeoChinaData {
   final List<GeoProvince> provinces;
   final List<GeoBoundary> boundaries;
   final Rect bounds;
+
+  double get aspectRatio {
+    if (bounds.height == 0) {
+      return defaultChinaMapAspectRatio;
+    }
+    return bounds.width / bounds.height;
+  }
+}
+
+class _ProjectedProvince {
+  const _ProjectedProvince({
+    required this.name,
+    required this.paths,
+    required this.labelCenter,
+  });
+
+  final String name;
+  final List<Path> paths;
+  final Offset labelCenter;
+}
+
+class _ProjectedBoundary {
+  const _ProjectedBoundary({
+    required this.paths,
+  });
+
+  final List<Path> paths;
+}
+
+class _ProjectedChinaData {
+  const _ProjectedChinaData({
+    required this.source,
+    required this.size,
+    required this.provinces,
+    required this.boundaries,
+  });
+
+  final GeoChinaData source;
+  final Size size;
+  final List<_ProjectedProvince> provinces;
+  final List<_ProjectedBoundary> boundaries;
+
+  _ProjectedProvince? provinceByName(String name) {
+    for (final _ProjectedProvince province in provinces) {
+      if (province.name == name) {
+        return province;
+      }
+    }
+    return null;
+  }
 }
 
 class ProvinceMapView extends StatefulWidget {
@@ -56,7 +115,8 @@ class ProvinceMapView extends StatefulWidget {
 }
 
 class _ProvinceMapViewState extends State<ProvinceMapView> {
-  late final Future<GeoChinaData> _future = _loadChinaGeoData();
+  late final Future<GeoChinaData> _future = preloadChinaGeoData();
+  _ProjectedChinaData? _projectedData;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +125,7 @@ class _ProvinceMapViewState extends State<ProvinceMapView> {
       builder: (BuildContext context, AsyncSnapshot<GeoChinaData> snapshot) {
         if (snapshot.hasError) {
           return AspectRatio(
-            aspectRatio: 1.12,
+            aspectRatio: defaultChinaMapAspectRatio,
             child: Center(
               child: Text(
                 '地图数据未配置',
@@ -81,7 +141,7 @@ class _ProvinceMapViewState extends State<ProvinceMapView> {
         }
         if (!snapshot.hasData) {
           return const AspectRatio(
-            aspectRatio: 1.12,
+            aspectRatio: defaultChinaMapAspectRatio,
             child: Center(
               child: SizedBox(
                 width: 18,
@@ -91,27 +151,30 @@ class _ProvinceMapViewState extends State<ProvinceMapView> {
             ),
           );
         }
+        final GeoChinaData data = snapshot.data!;
         return AspectRatio(
-          aspectRatio: 1.12,
+          aspectRatio: data.aspectRatio,
           child: LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {
               final Size size =
                   Size(constraints.maxWidth, constraints.maxHeight);
+              final _ProjectedChinaData projectedData =
+                  _projectedDataFor(data, size);
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (TapDownDetails details) {
                   final String? province =
-                      _provinceAt(snapshot.data!, details.localPosition, size);
+                      _provinceAt(projectedData, details.localPosition);
                   if (province != null) {
                     widget.onSelected(province);
                   }
                 },
                 child: CustomPaint(
-                  painter: ProvinceMapPainter(
-                    data: snapshot.data!,
+                  painter: _ProvinceMapPainter(
+                    data: projectedData,
                     counts: widget.counts,
                     selectedProvince: widget.selectedProvince,
-                    lineColor: Theme.of(context).dividerColor.withOpacity(0.66),
+                    lineColor: Theme.of(context).dividerColor,
                     boundaryColor:
                         Theme.of(context).colorScheme.onSurfaceVariant,
                     labelColor: Theme.of(context).textTheme.bodySmall?.color ??
@@ -125,10 +188,20 @@ class _ProvinceMapViewState extends State<ProvinceMapView> {
       },
     );
   }
+
+  _ProjectedChinaData _projectedDataFor(GeoChinaData data, Size size) {
+    final _ProjectedChinaData? cached = _projectedData;
+    if (cached != null &&
+        identical(cached.source, data) &&
+        cached.size == size) {
+      return cached;
+    }
+    return _projectedData = _projectChinaData(data, size);
+  }
 }
 
-class ProvinceMapPainter extends CustomPainter {
-  const ProvinceMapPainter({
+class _ProvinceMapPainter extends CustomPainter {
+  const _ProvinceMapPainter({
     required this.data,
     required this.counts,
     required this.selectedProvince,
@@ -137,7 +210,7 @@ class ProvinceMapPainter extends CustomPainter {
     required this.labelColor,
   });
 
-  final GeoChinaData data;
+  final _ProjectedChinaData data;
   final Map<String, int> counts;
   final String? selectedProvince;
   final Color lineColor;
@@ -149,52 +222,47 @@ class ProvinceMapPainter extends CustomPainter {
     final Paint border = Paint()
       ..color = lineColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.7;
+      ..strokeWidth = _provinceStrokeWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
     final Paint selectedBorder = Paint()
-      ..color = const Color(0xFF2B6E38).withOpacity(0.60)
+      ..color = const Color(0xFF2B6E38)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
+      ..strokeWidth = _provinceStrokeWidth
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
     final Paint officialBoundary = Paint()
       ..color = boundaryColor.withOpacity(0.82)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.95
+      ..strokeWidth = _provinceStrokeWidth
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
 
-    for (final GeoProvince province in data.provinces) {
+    for (final _ProjectedProvince province in data.provinces) {
       final int count = counts[province.name] ?? 0;
       final bool selected = selectedProvince == province.name;
       final Paint fill = Paint()..color = provinceColor(count, selected);
-      for (final Path path in _pathsForProvince(data, province, size)) {
+      for (final Path path in province.paths) {
         canvas.drawPath(path, fill);
         canvas.drawPath(path, selected ? selectedBorder : border);
       }
     }
 
-    for (final GeoBoundary boundary in data.boundaries) {
-      for (final Path path in _pathsForBoundary(data, boundary, size)) {
+    for (final _ProjectedBoundary boundary in data.boundaries) {
+      for (final Path path in boundary.paths) {
         canvas.drawPath(path, officialBoundary);
       }
     }
 
     if (selectedProvince != null) {
-      final GeoProvince? province = _provinceByName(selectedProvince!);
+      final _ProjectedProvince? province =
+          data.provinceByName(selectedProvince!);
       if (province != null) {
-        final Offset labelCenter = _visualCenter(data, province, size);
         final int count = counts[selectedProvince] ?? 0;
         _drawText(canvas, '${_shortName(selectedProvince!)}  $count次',
-            labelCenter, 11, labelColor);
+            province.labelCenter, 11, labelColor);
       }
     }
-  }
-
-  GeoProvince? _provinceByName(String name) {
-    for (final GeoProvince province in data.provinces) {
-      if (province.name == name) {
-        return province;
-      }
-    }
-    return null;
   }
 
   void _drawText(
@@ -220,7 +288,7 @@ class ProvinceMapPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant ProvinceMapPainter oldDelegate) {
+  bool shouldRepaint(covariant _ProvinceMapPainter oldDelegate) {
     return oldDelegate.data != data ||
         oldDelegate.counts != counts ||
         oldDelegate.selectedProvince != selectedProvince ||
@@ -228,6 +296,25 @@ class ProvinceMapPainter extends CustomPainter {
         oldDelegate.boundaryColor != boundaryColor ||
         oldDelegate.labelColor != labelColor;
   }
+}
+
+_ProjectedChinaData _projectChinaData(GeoChinaData data, Size size) {
+  return _ProjectedChinaData(
+    source: data,
+    size: size,
+    provinces: data.provinces.map((GeoProvince province) {
+      return _ProjectedProvince(
+        name: province.name,
+        paths: _pathsForProvince(data, province, size),
+        labelCenter: _visualCenter(data, province, size),
+      );
+    }).toList(growable: false),
+    boundaries: data.boundaries.map((GeoBoundary boundary) {
+      return _ProjectedBoundary(
+        paths: _pathsForBoundary(data, boundary, size),
+      );
+    }).toList(growable: false),
+  );
 }
 
 Future<GeoChinaData> _loadChinaGeoData() async {
@@ -395,10 +482,21 @@ List<Path> _pathsForBoundary(
 }
 
 Offset _project(GeoChinaData data, Offset lonLat, Size size) {
-  final Rect bounds = data.bounds;
-  const double padding = 8;
-  final double availableWidth = size.width - padding * 2;
-  final double availableHeight = size.height - padding * 2;
+  return _projectWithBounds(data.bounds, lonLat, size);
+}
+
+Offset _projectWithBounds(Rect bounds, Offset lonLat, Size size) {
+  final Rect projectedBounds = projectedMapBoundsForTesting(bounds, size);
+  final double scale = projectedBounds.width / bounds.width;
+  return Offset(
+    projectedBounds.left + (lonLat.dx - bounds.left) * scale,
+    projectedBounds.top + (bounds.bottom - lonLat.dy) * scale,
+  );
+}
+
+Rect projectedMapBoundsForTesting(Rect bounds, Size size) {
+  final double availableWidth = size.width - _mapPadding * 2;
+  final double availableHeight = size.height - _mapPadding * 2;
   final double geoWidth = bounds.width;
   final double geoHeight = bounds.height;
   final double scale =
@@ -407,15 +505,12 @@ Offset _project(GeoChinaData data, Offset lonLat, Size size) {
   final double drawnHeight = geoHeight * scale;
   final double offsetX = (size.width - drawnWidth) / 2;
   final double offsetY = (size.height - drawnHeight) / 2;
-  return Offset(
-    offsetX + (lonLat.dx - bounds.left) * scale,
-    offsetY + (bounds.bottom - lonLat.dy) * scale,
-  );
+  return Rect.fromLTWH(offsetX, offsetY, drawnWidth, drawnHeight);
 }
 
-String? _provinceAt(GeoChinaData data, Offset position, Size size) {
-  for (final GeoProvince province in data.provinces.reversed) {
-    for (final Path path in _pathsForProvince(data, province, size)) {
+String? _provinceAt(_ProjectedChinaData data, Offset position) {
+  for (final _ProjectedProvince province in data.provinces.reversed) {
+    for (final Path path in province.paths) {
       if (path.contains(position)) {
         return province.name;
       }
