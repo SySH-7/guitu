@@ -244,7 +244,12 @@ class _ProvinceMapPainter extends CustomPainter {
       final Paint fill = Paint()..color = provinceColor(count, selected);
       for (final Path path in province.paths) {
         canvas.drawPath(path, fill);
-        canvas.drawPath(path, selected ? selectedBorder : border);
+      }
+    }
+
+    for (final _ProjectedProvince province in data.provinces) {
+      for (final Path path in province.paths) {
+        canvas.drawPath(path, border);
       }
     }
 
@@ -258,6 +263,9 @@ class _ProvinceMapPainter extends CustomPainter {
       final _ProjectedProvince? province =
           data.provinceByName(selectedProvince!);
       if (province != null) {
+        for (final Path path in province.paths) {
+          canvas.drawPath(path, selectedBorder);
+        }
         final int count = counts[selectedProvince] ?? 0;
         _drawText(canvas, '${_shortName(selectedProvince!)}  $count次',
             province.labelCenter, 11, labelColor);
