@@ -51,8 +51,22 @@ class SettingsScreen extends StatelessWidget {
 
   Future<void> _importData(BuildContext context, ArchiveStore store) async {
     try {
+      final bool canAccess = await _prepareDocumentAccess(
+        context,
+        store,
+        ArchiveDocumentAction.importData,
+      );
+      if (!canAccess) {
+        return;
+      }
       final bool imported = await store.importFromDevice();
       if (!imported) {
+        if (!context.mounted) {
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('未选择导入文件，导入已取消')),
+        );
         return;
       }
       if (!context.mounted) {
@@ -71,8 +85,22 @@ class SettingsScreen extends StatelessWidget {
 
   Future<void> _exportData(BuildContext context, ArchiveStore store) async {
     try {
+      final bool canAccess = await _prepareDocumentAccess(
+        context,
+        store,
+        ArchiveDocumentAction.exportData,
+      );
+      if (!canAccess) {
+        return;
+      }
       final String? target = await store.exportToDevice();
       if (target == null) {
+        if (!context.mounted) {
+          return;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('未选择保存位置，导出已取消')),
+        );
         return;
       }
       if (!context.mounted) {
@@ -86,6 +114,115 @@ class SettingsScreen extends StatelessWidget {
       }
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('导出失败：$error')));
+    }
+  }
+
+  Future<bool> _prepareDocumentAccess(
+    BuildContext context,
+    ArchiveStore store,
+    ArchiveDocumentAction action,
+  ) async {
+    final bool hasSeenNotice = await store.hasSeenDocumentAccessNotice(action);
+    if (!context.mounted) {
+      return false;
+    }
+    if (!hasSeenNotice) {
+      final bool accepted = await _showDocumentAccessNotice(context, action);
+      if (!accepted) {
+        if (!context.mounted) {
+          return false;
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${_documentActionLabel(action)}已取消')),
+        );
+        return false;
+      }
+      await store.markDocumentAccessNoticeSeen(action);
+      if (!context.mounted) {
+        return false;
+      }
+    }
+
+    final DocumentAccessGrant grant = await store.requestDocumentAccess(action);
+    if (grant.granted) {
+      return true;
+    }
+    if (!context.mounted) {
+      return false;
+    }
+    await _showDocumentAccessDenied(context, action, grant);
+    return false;
+  }
+
+  Future<bool> _showDocumentAccessNotice(
+    BuildContext context,
+    ArchiveDocumentAction action,
+  ) async {
+    final bool isImport = action == ArchiveDocumentAction.importData;
+    final bool? accepted = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          icon: const Icon(CupertinoIcons.folder),
+          title: Text(isImport ? '导入数据权限说明' : '导出数据权限说明'),
+          content: Text(
+            isImport
+                ? '导入数据需要读取你选择的 JSON 文件。归途只会访问你主动选择的文件，不会扫描其它文件或目录。'
+                : '导出数据需要把备份 JSON 写入你指定的位置。归途只会写入本次选择的文件，不会改动其它文件。',
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: const Text('暂不授权'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: const Text('继续'),
+            ),
+          ],
+        );
+      },
+    );
+    return accepted == true;
+  }
+
+  Future<void> _showDocumentAccessDenied(
+    BuildContext context,
+    ArchiveDocumentAction action,
+    DocumentAccessGrant grant,
+  ) {
+    final bool isImport = action == ArchiveDocumentAction.importData;
+    final String retryText = isImport ? '下次点击导入数据时会再次申请。' : '下次点击导出数据时会再次申请。';
+    final String settingText =
+        grant.permanentlyDenied ? '如果系统不再弹窗，请到系统设置中开启文件/存储访问权限。' : '';
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          icon: const Icon(CupertinoIcons.exclamationmark_triangle),
+          title: const Text('权限未授予'),
+          content: Text(
+            isImport
+                ? '没有文件读取权限，无法打开数据文件。$retryText$settingText'
+                : '没有文件写入权限，无法保存导出文件。$retryText$settingText',
+          ),
+          actions: <Widget>[
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('知道了'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _documentActionLabel(ArchiveDocumentAction action) {
+    switch (action) {
+      case ArchiveDocumentAction.importData:
+        return '导入数据';
+      case ArchiveDocumentAction.exportData:
+        return '导出数据';
     }
   }
 

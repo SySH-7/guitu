@@ -63,6 +63,71 @@ void main() {
     expect(await storage.exportSnapshot('{}', 'guitu.json'), isNull);
   });
 
+  test('文件访问授权状态会解析原生返回', () async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(storageChannel, (MethodCall call) async {
+      expect(call.method, 'requestDocumentAccess');
+      expect(
+        (call.arguments as Map<dynamic, dynamic>)['action'],
+        ArchiveDocumentAction.importData.name,
+      );
+      return <String, Object?>{
+        'granted': false,
+        'systemDialogShown': true,
+        'permanentlyDenied': true,
+        'sdkInt': 32,
+      };
+    });
+
+    final ArchivePlatformStorage storage = ArchivePlatformStorage();
+    final DocumentAccessGrant grant = await storage.requestDocumentAccess(
+      ArchiveDocumentAction.importData,
+    );
+
+    expect(grant.granted, isFalse);
+    expect(grant.systemDialogShown, isTrue);
+    expect(grant.permanentlyDenied, isTrue);
+    expect(grant.sdkInt, 32);
+  });
+
+  test('文件访问说明状态通过原生通道持久化', () async {
+    final List<String> calls = <String>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(storageChannel, (MethodCall call) async {
+      calls.add(call.method);
+      if (call.method == 'hasSeenDocumentAccessNotice') {
+        expect(
+          (call.arguments as Map<dynamic, dynamic>)['action'],
+          ArchiveDocumentAction.exportData.name,
+        );
+        return false;
+      }
+      if (call.method == 'markDocumentAccessNoticeSeen') {
+        expect(
+          (call.arguments as Map<dynamic, dynamic>)['action'],
+          ArchiveDocumentAction.exportData.name,
+        );
+      }
+      return null;
+    });
+
+    final ArchivePlatformStorage storage = ArchivePlatformStorage();
+
+    expect(
+      await storage.hasSeenDocumentAccessNotice(
+        ArchiveDocumentAction.exportData,
+      ),
+      isFalse,
+    );
+    await storage.markDocumentAccessNoticeSeen(
+      ArchiveDocumentAction.exportData,
+    );
+    expect(calls, <String>[
+      'hasSeenDocumentAccessNotice',
+      'markDocumentAccessNoticeSeen',
+    ]);
+  });
+
   test('新增记录会更新 entries 并写入快照', () async {
     final List<String> writes = <String>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

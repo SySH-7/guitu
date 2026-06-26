@@ -62,6 +62,83 @@ class ArchivePlatformStorage {
       return file.path;
     }
   }
+
+  Future<bool> hasSeenDocumentAccessNotice(
+    ArchiveDocumentAction action,
+  ) async {
+    try {
+      return await _channel.invokeMethod<bool>(
+            'hasSeenDocumentAccessNotice',
+            <String, Object?>{'action': action.name},
+          ) ??
+          false;
+    } on MissingPluginException {
+      return true;
+    }
+  }
+
+  Future<void> markDocumentAccessNoticeSeen(
+    ArchiveDocumentAction action,
+  ) async {
+    try {
+      await _channel.invokeMethod<void>(
+        'markDocumentAccessNoticeSeen',
+        <String, Object?>{'action': action.name},
+      );
+    } on MissingPluginException {
+      return;
+    }
+  }
+
+  Future<DocumentAccessGrant> requestDocumentAccess(
+    ArchiveDocumentAction action,
+  ) async {
+    try {
+      final Object? raw = await _channel.invokeMethod<Object?>(
+        'requestDocumentAccess',
+        <String, Object?>{'action': action.name},
+      );
+      return DocumentAccessGrant.fromPlatform(raw);
+    } on MissingPluginException {
+      return const DocumentAccessGrant(
+        granted: true,
+        systemDialogShown: false,
+        permanentlyDenied: false,
+      );
+    }
+  }
+}
+
+enum ArchiveDocumentAction { importData, exportData }
+
+class DocumentAccessGrant {
+  const DocumentAccessGrant({
+    required this.granted,
+    required this.systemDialogShown,
+    required this.permanentlyDenied,
+    this.sdkInt,
+  });
+
+  final bool granted;
+  final bool systemDialogShown;
+  final bool permanentlyDenied;
+  final int? sdkInt;
+
+  factory DocumentAccessGrant.fromPlatform(Object? raw) {
+    if (raw is Map<dynamic, dynamic>) {
+      return DocumentAccessGrant(
+        granted: raw['granted'] as bool? ?? false,
+        systemDialogShown: raw['systemDialogShown'] as bool? ?? false,
+        permanentlyDenied: raw['permanentlyDenied'] as bool? ?? false,
+        sdkInt: (raw['sdkInt'] as num?)?.round(),
+      );
+    }
+    return const DocumentAccessGrant(
+      granted: false,
+      systemDialogShown: false,
+      permanentlyDenied: false,
+    );
+  }
 }
 
 class ArchiveStore extends ChangeNotifier {
@@ -148,6 +225,24 @@ class ArchiveStore extends ChangeNotifier {
     final String fileName =
         'guitu_export_${DateTime.now().millisecondsSinceEpoch}.json';
     return _storage.exportSnapshot(exportJson(), fileName);
+  }
+
+  Future<bool> hasSeenDocumentAccessNotice(
+    ArchiveDocumentAction action,
+  ) {
+    return _storage.hasSeenDocumentAccessNotice(action);
+  }
+
+  Future<void> markDocumentAccessNoticeSeen(
+    ArchiveDocumentAction action,
+  ) {
+    return _storage.markDocumentAccessNoticeSeen(action);
+  }
+
+  Future<DocumentAccessGrant> requestDocumentAccess(
+    ArchiveDocumentAction action,
+  ) {
+    return _storage.requestDocumentAccess(action);
   }
 
   String exportJson() {

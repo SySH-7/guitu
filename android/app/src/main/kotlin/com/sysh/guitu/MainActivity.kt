@@ -1,8 +1,11 @@
 package com.sysh.guitu
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -14,8 +17,13 @@ class MainActivity : FlutterActivity() {
     private val channelName = "guitu/storage"
     private val importRequestCode = 4101
     private val exportRequestCode = 4102
+    private val storagePermissionRequestCode = 4103
+    private val preferenceName = "guitu_preferences"
+    private val documentAccessNoticeKeyPrefix = "document_access_notice_seen"
     private var pendingResult: MethodChannel.Result? = null
     private var pendingExportData: String? = null
+    private var pendingPermissionResult: MethodChannel.Result? = null
+    private var pendingPermissionNames: List<String> = emptyList()
 
     private val snapshotFile: File
         get() = File(filesDir, "guitu_archive_snapshot.json")
@@ -28,6 +36,9 @@ class MainActivity : FlutterActivity() {
                 "writeSnapshot" -> writeSnapshot(call, result)
                 "importSnapshot" -> importSnapshot(result)
                 "exportSnapshot" -> exportSnapshot(call, result)
+                "hasSeenDocumentAccessNotice" -> hasSeenDocumentAccessNotice(call, result)
+                "markDocumentAccessNoticeSeen" -> markDocumentAccessNoticeSeen(call, result)
+                "requestDocumentAccess" -> requestDocumentAccess(result)
                 else -> result.notImplemented()
             }
         }
@@ -52,6 +63,70 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    private fun hasSeenDocumentAccessNotice(call: MethodCall, result: MethodChannel.Result) {
+        val key = documentAccessNoticeKey(call)
+        val preferences = getSharedPreferences(preferenceName, MODE_PRIVATE)
+        result.success(preferences.getBoolean(key, false))
+    }
+
+    private fun markDocumentAccessNoticeSeen(call: MethodCall, result: MethodChannel.Result) {
+        val key = documentAccessNoticeKey(call)
+        getSharedPreferences(preferenceName, MODE_PRIVATE)
+            .edit()
+            .putBoolean(key, true)
+            .apply()
+        result.success(null)
+    }
+
+    private fun documentAccessNoticeKey(call: MethodCall): String {
+        val action = call.argument<String>("action") ?: "general"
+        return "${documentAccessNoticeKeyPrefix}_$action"
+    }
+
+    private fun requestDocumentAccess(result: MethodChannel.Result) {
+        if (pendingPermissionResult != null) {
+            result.error("BUSY", "A permission request is already running.", null)
+            return
+        }
+
+        val permissions = requiredDocumentPermissions()
+        if (permissions.isEmpty() || permissions.all { checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }) {
+            result.success(permissionPayload(granted = true, systemDialogShown = false, permanentlyDenied = false))
+            return
+        }
+
+        pendingPermissionResult = result
+        pendingPermissionNames = permissions
+        requestPermissions(permissions.toTypedArray(), storagePermissionRequestCode)
+    }
+
+    private fun requiredDocumentPermissions(): List<String> {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return emptyList()
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return emptyList()
+        }
+        val permissions = mutableListOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+        return permissions
+    }
+
+    private fun permissionPayload(
+        granted: Boolean,
+        systemDialogShown: Boolean,
+        permanentlyDenied: Boolean,
+    ): Map<String, Any> {
+        return mapOf(
+            "granted" to granted,
+            "systemDialogShown" to systemDialogShown,
+            "permanentlyDenied" to permanentlyDenied,
+            "sdkInt" to Build.VERSION.SDK_INT,
+        )
+    }
+
     private fun importSnapshot(result: MethodChannel.Result) {
         if (pendingResult != null) {
             result.error("BUSY", "A document action is already running.", null)
@@ -60,7 +135,11 @@ class MainActivity : FlutterActivity() {
         pendingResult = result
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = "application/json"
+            type = "*/*"
+            putExtra(
+                Intent.EXTRA_MIME_TYPES,
+                arrayOf("application/json", "text/json", "text/plain", "application/octet-stream"),
+            )
         }
         startActivityForResult(intent, importRequestCode)
     }
@@ -88,6 +167,34 @@ class MainActivity : FlutterActivity() {
             importRequestCode -> finishImport(resultCode, data?.data)
             exportRequestCode -> finishExport(resultCode, data?.data)
         }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        if (requestCode == storagePermissionRequestCode) {
+            val result = pendingPermissionResult ?: return
+            val requestedPermissions = pendingPermissionNames
+            pendingPermissionResult = null
+            pendingPermissionNames = emptyList()
+
+            val granted = grantResults.isNotEmpty() &&
+                grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+            val permanentlyDenied = !granted && requestedPermissions.any {
+                !shouldShowRequestPermissionRationale(it)
+            }
+            result.success(
+                permissionPayload(
+                    granted = granted,
+                    systemDialogShown = true,
+                    permanentlyDenied = permanentlyDenied,
+                ),
+            )
+            return
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     private fun finishImport(resultCode: Int, uri: Uri?) {
