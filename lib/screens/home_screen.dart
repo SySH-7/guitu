@@ -105,7 +105,9 @@ class _SearchSheetState extends State<_SearchSheet> {
       if (keyword.isEmpty) {
         return true;
       }
-      return '${entry.title}${entry.category}${entry.creator ?? ''}${entry.city ?? ''}${entry.province ?? ''}'
+      final String category =
+          entry.kind == ArchiveKind.place ? '' : entry.category;
+      return '${entry.title}$category${entry.creator ?? ''}${entry.city ?? ''}${entry.province ?? ''}'
           .contains(keyword);
     }).toList(growable: false)
           ..sort((ArchiveEntry a, ArchiveEntry b) => b.date.compareTo(a.date));

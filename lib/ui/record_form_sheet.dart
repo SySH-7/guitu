@@ -183,7 +183,7 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
       case ArchiveKind.film:
         return filmCategories;
       case ArchiveKind.place:
-        return <String>['城市漫步', '自然', '历史', '展览', '海边', '其他'];
+        return const <String>['地点'];
     }
   }
 
@@ -259,20 +259,24 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
                     ),
                     const SizedBox(height: 12),
                   ],
-                  DropdownButtonFormField<String>(
-                    value: _category,
-                    decoration: _requiredDecoration('类型'),
-                    items: _categories
-                        .map((String value) => DropdownMenuItem<String>(
-                            value: value, child: Text(value)))
-                        .toList(),
-                    onChanged: (String? value) =>
-                        setState(() => _category = value ?? _category),
-                  ),
-                  const SizedBox(height: 12),
+                  if (widget.kind != ArchiveKind.place) ...<Widget>[
+                    DropdownButtonFormField<String>(
+                      value: _category,
+                      decoration: _requiredDecoration('类型'),
+                      items: _categories
+                          .map((String value) => DropdownMenuItem<String>(
+                              value: value, child: Text(value)))
+                          .toList(),
+                      onChanged: (String? value) =>
+                          setState(() => _category = value ?? _category),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   if (widget.kind == ArchiveKind.place) ...<Widget>[
                     DropdownButtonFormField<String>(
                       value: _province,
+                      isExpanded: true,
+                      menuMaxHeight: 420,
                       decoration: _requiredDecoration('省份'),
                       items: provinceNames
                           .map((String value) => DropdownMenuItem<String>(
@@ -290,7 +294,10 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
                     ),
                     const SizedBox(height: 12),
                     DropdownButtonFormField<String>(
+                      key: ValueKey<String>(_province),
                       value: _city,
+                      isExpanded: true,
+                      menuMaxHeight: 420,
                       decoration: _requiredDecoration('城市'),
                       items: chinaCities[_province]!
                           .map((String value) => DropdownMenuItem<String>(
@@ -416,7 +423,7 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       kind: widget.kind,
       title: title,
-      category: _category,
+      category: isPlace ? '地点' : _category,
       date: _date,
       rating: _rating,
       amount: isPlace ? 1 : _amount,

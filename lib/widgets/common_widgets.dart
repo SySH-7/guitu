@@ -673,7 +673,7 @@ String _entrySubtitle(ArchiveEntry entry) {
     case ArchiveKind.film:
       return '${entry.creator ?? '未知导演'} / ${entry.category} / ${entry.amount}季';
     case ArchiveKind.place:
-      return '${entry.province ?? ''}${entry.city == null ? '' : ' · ${entry.city}'} / ${entry.category}';
+      return '${entry.province ?? ''}${entry.city == null ? '' : ' · ${entry.city}'}';
   }
 }
 

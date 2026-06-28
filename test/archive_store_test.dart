@@ -197,6 +197,12 @@ void main() {
         ),
       ];
     final String raw = source.exportJson();
+    final Map<String, dynamic> exported =
+        jsonDecode(raw) as Map<String, dynamic>;
+    final List<dynamic> exportedEntries = exported['entries'] as List<dynamic>;
+    final Map<String, dynamic> exportedPlace =
+        exportedEntries.last as Map<String, dynamic>;
+    expect(exportedPlace, isNot(contains('category')));
     final ArchiveStore restored = ArchiveStore();
 
     await restored.replaceFromJson(raw);
@@ -207,5 +213,24 @@ void main() {
     expect(restored.entries, hasLength(2));
     expect(restored.entries.first.title, '测试电影');
     expect(restored.entries.last.province, '浙江省');
+    expect(restored.entries.last.category, '地点');
+  });
+
+  test('旧地点 JSON 的类型字段会被兼容读取但不再保留', () {
+    final ArchiveEntry place = ArchiveEntry.fromJson(<String, dynamic>{
+      'id': 'legacy-place',
+      'kind': 'place',
+      'title': '旧地点',
+      'category': '城市漫步',
+      'date': '2026-06-01T00:00:00.000',
+      'rating': 4,
+      'amount': 1,
+      'province': '浙江省',
+      'city': '杭州市',
+      'createdAt': '2026-06-01T00:00:00.000',
+    });
+
+    expect(place.category, '地点');
+    expect(place.toJson(), isNot(contains('category')));
   });
 }

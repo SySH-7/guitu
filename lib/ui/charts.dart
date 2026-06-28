@@ -8,6 +8,63 @@ const Color archiveOrange = Color(0xFFFF8A1F);
 const Color archiveBlue = Color(0xFF1E88FF);
 const Color archiveGreen = Color(0xFF44B75C);
 
+@immutable
+class ChartAxisScale {
+  const ChartAxisScale({
+    required this.maxValue,
+    required this.tickStep,
+  });
+
+  final int maxValue;
+  final int tickStep;
+
+  List<int> get ticks => List<int>.generate(
+        maxValue ~/ tickStep + 1,
+        (int index) => index * tickStep,
+        growable: false,
+      );
+
+  factory ChartAxisScale.fromValues(Iterable<int> values) {
+    final int dataMax = values.fold<int>(0, math.max);
+    if (dataMax <= 4) {
+      return const ChartAxisScale(maxValue: 4, tickStep: 1);
+    }
+
+    int? bestStep;
+    int? bestMax;
+    double bestScore = double.infinity;
+    const List<double> multipliers = <double>[1, 2, 2.5, 5, 10];
+
+    for (int exponent = 0; exponent <= 8; exponent += 1) {
+      final double magnitude = math.pow(10, exponent).toDouble();
+      for (final double multiplier in multipliers) {
+        final double rawStep = multiplier * magnitude;
+        if (rawStep != rawStep.roundToDouble()) {
+          continue;
+        }
+        final int step = rawStep.round();
+        final int axisMax = (dataMax / step).ceil() * step;
+        final int intervalCount = axisMax ~/ step;
+        if (intervalCount < 4 || intervalCount > 6) {
+          continue;
+        }
+        final double headroom = (axisMax - dataMax) / dataMax;
+        final double score = (intervalCount - 5).abs() + headroom * 0.5;
+        if (score < bestScore) {
+          bestScore = score;
+          bestStep = step;
+          bestMax = axisMax;
+        }
+      }
+    }
+
+    if (bestStep != null && bestMax != null) {
+      return ChartAxisScale(maxValue: bestMax, tickStep: bestStep);
+    }
+    return ChartAxisScale(maxValue: dataMax, tickStep: dataMax);
+  }
+}
+
 class CombinedBarChart extends StatelessWidget {
   const CombinedBarChart({
     super.key,
@@ -55,17 +112,20 @@ class _CombinedBarPainter extends CustomPainter {
     final Paint gridPaint = Paint()
       ..color = axisColor
       ..strokeWidth = 1;
-    const double left = 28;
+    final ChartAxisScale scale =
+        ChartAxisScale.fromValues(<int>[...bookValues, ...filmValues]);
+    final double left = math.max(34, 18 + scale.maxValue.toString().length * 6);
     const double top = 10;
     const double bottom = 28;
     final double chartHeight = size.height - top - bottom;
     final double chartWidth = size.width - left - 8;
-    final int maxValue =
-        math.max(5, <int>[...bookValues, ...filmValues].fold<int>(0, math.max));
 
-    for (int i = 0; i <= 3; i += 1) {
-      final double y = top + chartHeight * i / 3;
+    for (final int tick in scale.ticks) {
+      final double y =
+          top + chartHeight - chartHeight * (tick / scale.maxValue);
       canvas.drawLine(Offset(left, y), Offset(size.width, y), gridPaint);
+      _drawText(
+          canvas, '$tick', Offset(left - 6, y), 9, labelColor, TextAlign.right);
     }
 
     final Paint bookPaint = Paint()
@@ -73,20 +133,20 @@ class _CombinedBarPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[Color(0xFFFF6B00), Color(0xFFFFB65A)],
-      ).createShader(Rect.fromLTWH(0, top, 0, chartHeight));
+      ).createShader(Rect.fromLTWH(0, top, size.width, chartHeight));
     final Paint filmPaint = Paint()
       ..shader = const LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: <Color>[Color(0xFF1075FF), Color(0xFF76BBFF)],
-      ).createShader(Rect.fromLTWH(0, top, 0, chartHeight));
+      ).createShader(Rect.fromLTWH(0, top, size.width, chartHeight));
 
     final double groupWidth = chartWidth / 12;
     final double barWidth = math.max(4, groupWidth * 0.18);
     for (int i = 0; i < 12; i += 1) {
       final double centerX = left + groupWidth * (i + 0.5);
-      final double bookHeight = chartHeight * (bookValues[i] / maxValue);
-      final double filmHeight = chartHeight * (filmValues[i] / maxValue);
+      final double bookHeight = chartHeight * (bookValues[i] / scale.maxValue);
+      final double filmHeight = chartHeight * (filmValues[i] / scale.maxValue);
       final RRect bookRect = RRect.fromRectAndRadius(
         Rect.fromLTWH(centerX - barWidth - 2, top + chartHeight - bookHeight,
             barWidth, bookHeight),
@@ -114,8 +174,10 @@ class _CombinedBarPainter extends CustomPainter {
       textDirection: TextDirection.ltr,
       textAlign: align,
     )..layout();
-    painter.paint(
-        canvas, center - Offset(painter.width / 2, painter.height / 2));
+    final double x = align == TextAlign.right
+        ? center.dx - painter.width
+        : center.dx - painter.width / 2;
+    painter.paint(canvas, Offset(x, center.dy - painter.height / 2));
   }
 
   @override
@@ -307,14 +369,11 @@ class _YearLinePainter extends CustomPainter {
       return 0;
     }
 
-    final int maxValue = math.max(
-      5,
-      <int>[
-        ...labels.map((String label) => valueFor(bookValues, label)),
-        ...labels.map((String label) => valueFor(filmValues, label)),
-      ].fold<int>(0, math.max),
-    );
-    const double left = 26;
+    final ChartAxisScale scale = ChartAxisScale.fromValues(<int>[
+      ...labels.map((String label) => valueFor(bookValues, label)),
+      ...labels.map((String label) => valueFor(filmValues, label)),
+    ]);
+    final double left = math.max(34, 18 + scale.maxValue.toString().length * 6);
     const double right = 10;
     const double top = 12;
     const double bottom = 32;
@@ -323,9 +382,12 @@ class _YearLinePainter extends CustomPainter {
     final Paint grid = Paint()
       ..color = gridColor
       ..strokeWidth = 1;
-    for (int i = 0; i <= 3; i += 1) {
-      final double y = top + chartHeight * i / 3;
+    for (final int tick in scale.ticks) {
+      final double y =
+          top + chartHeight - chartHeight * (tick / scale.maxValue);
       canvas.drawLine(Offset(left, y), Offset(size.width - right, y), grid);
+      _drawText(canvas, '$tick', Offset(left - 6, y), 9, labelColor,
+          align: TextAlign.right);
     }
 
     List<Offset> pointsFor(List<YearStatPoint> values) {
@@ -334,7 +396,8 @@ class _YearLinePainter extends CustomPainter {
         final double x = labels.length == 1
             ? left + chartWidth / 2
             : left + chartWidth * index / (labels.length - 1);
-        final double y = top + chartHeight - chartHeight * (value / maxValue);
+        final double y =
+            top + chartHeight - chartHeight * (value / scale.maxValue);
         return Offset(x, y);
       });
     }
@@ -386,16 +449,20 @@ class _YearLinePainter extends CustomPainter {
   }
 
   void _drawText(
-      Canvas canvas, String text, Offset center, double size, Color color) {
+      Canvas canvas, String text, Offset center, double size, Color color,
+      {TextAlign align = TextAlign.center}) {
     final TextPainter painter = TextPainter(
       text: TextSpan(
           text: text,
           style: TextStyle(
               color: color, fontSize: size, fontWeight: FontWeight.w600)),
       textDirection: TextDirection.ltr,
+      textAlign: align,
     )..layout();
-    painter.paint(
-        canvas, center - Offset(painter.width / 2, painter.height / 2));
+    final double x = align == TextAlign.right
+        ? center.dx - painter.width
+        : center.dx - painter.width / 2;
+    painter.paint(canvas, Offset(x, center.dy - painter.height / 2));
   }
 
   @override

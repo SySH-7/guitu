@@ -1,3 +1,5 @@
+export 'china_regions.dart';
+
 enum ArchiveKind { book, film, place }
 
 extension ArchiveKindLabel on ArchiveKind {
@@ -92,11 +94,10 @@ class ArchiveEntry {
   }
 
   Map<String, dynamic> toJson() {
-    return <String, dynamic>{
+    final Map<String, dynamic> json = <String, dynamic>{
       'id': id,
       'kind': kind.name,
       'title': title,
-      'category': category,
       'date': date.toIso8601String(),
       'rating': rating,
       'amount': amount,
@@ -108,18 +109,25 @@ class ArchiveEntry {
       'notes': notes,
       'createdAt': createdAt.toIso8601String(),
     };
+    if (kind != ArchiveKind.place) {
+      json['category'] = category;
+    }
+    return json;
   }
 
   factory ArchiveEntry.fromJson(Map<String, dynamic> json) {
+    final ArchiveKind kind = ArchiveKind.values.firstWhere(
+      (ArchiveKind value) => value.name == json['kind'],
+      orElse: () => ArchiveKind.book,
+    );
     return ArchiveEntry(
       id: (json['id'] as String?) ??
           DateTime.now().microsecondsSinceEpoch.toString(),
-      kind: ArchiveKind.values.firstWhere(
-        (ArchiveKind value) => value.name == json['kind'],
-        orElse: () => ArchiveKind.book,
-      ),
+      kind: kind,
       title: (json['title'] as String?) ?? '未命名记录',
-      category: (json['category'] as String?) ?? '其他',
+      category: kind == ArchiveKind.place
+          ? '地点'
+          : (json['category'] as String?) ?? '其他',
       date:
           DateTime.tryParse((json['date'] as String?) ?? '') ?? DateTime.now(),
       rating: ((json['rating'] as num?)?.round() ?? 3).clamp(1, 5).toInt(),
@@ -160,45 +168,6 @@ const List<String> filmCategories = <String>[
   '综艺',
   '其他'
 ];
-
-const Map<String, List<String>> chinaCities = <String, List<String>>{
-  '北京市': <String>['北京市'],
-  '上海市': <String>['上海市'],
-  '天津市': <String>['天津市'],
-  '重庆市': <String>['重庆市'],
-  '河北省': <String>['石家庄市', '秦皇岛市', '承德市'],
-  '山西省': <String>['太原市', '大同市', '平遥县'],
-  '内蒙古自治区': <String>['呼和浩特市', '包头市', '呼伦贝尔市'],
-  '辽宁省': <String>['沈阳市', '大连市', '丹东市'],
-  '吉林省': <String>['长春市', '吉林市', '延边州'],
-  '黑龙江省': <String>['哈尔滨市', '齐齐哈尔市', '牡丹江市'],
-  '江苏省': <String>['南京市', '苏州市', '无锡市'],
-  '浙江省': <String>['杭州市', '宁波市', '温州市'],
-  '安徽省': <String>['合肥市', '黄山市', '芜湖市'],
-  '福建省': <String>['福州市', '厦门市', '泉州市'],
-  '江西省': <String>['南昌市', '景德镇市', '九江市'],
-  '山东省': <String>['济南市', '青岛市', '烟台市'],
-  '河南省': <String>['郑州市', '洛阳市', '开封市'],
-  '湖北省': <String>['武汉市', '宜昌市', '恩施市'],
-  '湖南省': <String>['长沙市', '张家界市', '岳阳市'],
-  '广东省': <String>['广州市', '深圳市', '珠海市'],
-  '广西壮族自治区': <String>['南宁市', '桂林市', '北海市'],
-  '海南省': <String>['海口市', '三亚市', '万宁市'],
-  '四川省': <String>['成都市', '绵阳市', '乐山市'],
-  '贵州省': <String>['贵阳市', '遵义市', '安顺市'],
-  '云南省': <String>['昆明市', '大理市', '丽江市'],
-  '西藏自治区': <String>['拉萨市', '林芝市', '日喀则市'],
-  '陕西省': <String>['西安市', '延安市', '汉中市'],
-  '甘肃省': <String>['兰州市', '敦煌市', '天水市'],
-  '青海省': <String>['西宁市', '海西州', '玉树州'],
-  '宁夏回族自治区': <String>['银川市', '中卫市', '吴忠市'],
-  '新疆维吾尔自治区': <String>['乌鲁木齐市', '喀什市', '伊宁市'],
-  '台湾省': <String>['台北市', '高雄市', '台中市'],
-  '香港特别行政区': <String>['香港'],
-  '澳门特别行政区': <String>['澳门'],
-};
-
-List<String> get provinceNames => chinaCities.keys.toList(growable: false);
 
 List<ArchiveEntry> seedArchiveEntries() {
   ArchiveEntry entry({
