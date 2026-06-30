@@ -38,6 +38,19 @@ void main() {
 
     expect(provinceFeatures, hasLength(34));
     expect(boundaryFeatures.length, greaterThanOrEqualTo(8));
+    final Map<String, dynamic> southChinaSeaBoundary =
+        boundaryFeatures.firstWhere((Map<String, dynamic> feature) {
+      final Map<String, dynamic> properties =
+          feature['properties'] as Map<String, dynamic>;
+      return properties['gb'] == southChinaSeaBoundaryGb;
+    });
+    expect(
+      displayedBoundaryLinesForFeature(
+        southChinaSeaBoundary['properties'] as Map<String, dynamic>,
+        southChinaSeaBoundary['geometry'] as Map<String, dynamic>,
+      ),
+      hasLength(southChinaSeaDashCount),
+    );
     expect(
       names,
       containsAll(<String>[
@@ -78,7 +91,7 @@ void main() {
     expect(minLatitude, lessThan(4));
   });
 
-  test('地图界面仅显示南海九段线', () {
+  test('地图界面显示南海十段线', () {
     final List<dynamic> lines = List<dynamic>.generate(
       10,
       (int index) => <List<double>>[
@@ -98,7 +111,27 @@ void main() {
     );
 
     expect(displayedLines, hasLength(southChinaSeaDashCount));
-    expect(displayedLines.last.first.dy, 12);
+    expect(displayedLines.last.first.dy, 13);
+  });
+
+  test('市级足迹地图保留海南省级兜底面', () {
+    final File file = File('assets/data/china_cities.geojson');
+    if (!file.existsSync()) {
+      return;
+    }
+    final Map<String, dynamic> data =
+        jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+    final List<dynamic> features = data['features'] as List<dynamic>;
+    final Set<String> names = features.map((dynamic feature) {
+      final Map<String, dynamic> properties = (feature
+          as Map<String, dynamic>)['properties'] as Map<String, dynamic>;
+      return properties['name'] as String;
+    }).toSet();
+
+    expect(
+      names,
+      containsAll(<String>['海南省', '海口市', '三亚市', '三沙市']),
+    );
   });
 
   test('地图投影在不同容器尺寸下保持经纬比例不变', () {

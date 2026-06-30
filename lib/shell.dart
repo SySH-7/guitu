@@ -101,7 +101,10 @@ class _ArchiveShellState extends State<ArchiveShell> {
 
   Future<void> _preloadMapDataSafely() async {
     try {
-      await preloadChinaGeoData();
+      await Future.wait(<Future<GeoChinaData>>[
+        preloadChinaGeoData(),
+        preloadChinaGeoData(assetPath: chinaCityGeoJsonAsset),
+      ]);
     } catch (_) {
       // The public source tree intentionally omits the private map asset.
     }

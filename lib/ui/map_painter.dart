@@ -1,19 +1,31 @@
 import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 const String southChinaSeaBoundaryGb = '156990000';
-const int southChinaSeaDashCount = 9;
+const int southChinaSeaDashCount = 10;
+const String chinaProvinceGeoJsonAsset = 'assets/data/china_provinces.geojson';
+const String chinaCityGeoJsonAsset = 'assets/data/china_cities.geojson';
 const double defaultChinaMapAspectRatio = 1.2280837330058147;
 const double _mapPadding = 8;
 const double _provinceStrokeWidth = 0.72;
 
-Future<GeoChinaData>? _cachedChinaGeoData;
+final Map<String, Future<GeoChinaData>> _cachedChinaGeoData =
+    <String, Future<GeoChinaData>>{};
+final Map<_ProjectionCacheKey, _ProjectedChinaData> _projectedChinaDataCache =
+    <_ProjectionCacheKey, _ProjectedChinaData>{};
+final Map<_MapBaseCacheKey, ui.Image> _baseMapImageCache =
+    <_MapBaseCacheKey, ui.Image>{};
+final Map<_MapBaseCacheKey, Future<ui.Image>> _baseMapImageFutures =
+    <_MapBaseCacheKey, Future<ui.Image>>{};
 
-Future<GeoChinaData> preloadChinaGeoData() {
-  return _cachedChinaGeoData ??= _loadChinaGeoData();
+Future<GeoChinaData> preloadChinaGeoData({
+  String assetPath = chinaProvinceGeoJsonAsset,
+}) {
+  return _cachedChinaGeoData[assetPath] ??= _loadChinaGeoData(assetPath);
 }
 
 class GeoProvince {
@@ -98,25 +110,96 @@ class _ProjectedChinaData {
   }
 }
 
+class _ProjectionCacheKey {
+  const _ProjectionCacheKey(this.source, this.size);
+
+  final GeoChinaData source;
+  final Size size;
+
+  @override
+  bool operator ==(Object other) {
+    return other is _ProjectionCacheKey &&
+        identical(other.source, source) &&
+        other.size == size;
+  }
+
+  @override
+  int get hashCode => Object.hash(identityHashCode(source), size);
+}
+
+class _MapBaseCacheKey {
+  const _MapBaseCacheKey({
+    required this.data,
+    required this.countsSignature,
+    required this.lineColor,
+    required this.boundaryColor,
+    required this.devicePixelRatioKey,
+  });
+
+  final _ProjectedChinaData data;
+  final int countsSignature;
+  final Color lineColor;
+  final Color boundaryColor;
+  final int devicePixelRatioKey;
+
+  @override
+  bool operator ==(Object other) {
+    return other is _MapBaseCacheKey &&
+        identical(other.data, data) &&
+        other.countsSignature == countsSignature &&
+        other.lineColor == lineColor &&
+        other.boundaryColor == boundaryColor &&
+        other.devicePixelRatioKey == devicePixelRatioKey;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        identityHashCode(data),
+        countsSignature,
+        lineColor,
+        boundaryColor,
+        devicePixelRatioKey,
+      );
+}
+
 class ProvinceMapView extends StatefulWidget {
   const ProvinceMapView({
     super.key,
     required this.counts,
     this.selectedProvince,
     required this.onSelected,
+    this.assetPath = chinaProvinceGeoJsonAsset,
+    this.preferRasterBaseMap = false,
   });
 
   final Map<String, int> counts;
   final String? selectedProvince;
   final ValueChanged<String> onSelected;
+  final String assetPath;
+  final bool preferRasterBaseMap;
 
   @override
   State<ProvinceMapView> createState() => _ProvinceMapViewState();
 }
 
 class _ProvinceMapViewState extends State<ProvinceMapView> {
-  late final Future<GeoChinaData> _future = preloadChinaGeoData();
+  late Future<GeoChinaData> _future;
   _ProjectedChinaData? _projectedData;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = preloadChinaGeoData(assetPath: widget.assetPath);
+  }
+
+  @override
+  void didUpdateWidget(covariant ProvinceMapView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.assetPath != widget.assetPath) {
+      _future = preloadChinaGeoData(assetPath: widget.assetPath);
+      _projectedData = null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,6 +243,37 @@ class _ProvinceMapViewState extends State<ProvinceMapView> {
                   Size(constraints.maxWidth, constraints.maxHeight);
               final _ProjectedChinaData projectedData =
                   _projectedDataFor(data, size);
+              final Color lineColor = Theme.of(context).dividerColor;
+              final Color boundaryColor =
+                  Theme.of(context).colorScheme.onSurfaceVariant;
+              final int countsSignature = _countsSignature(widget.counts);
+              final double devicePixelRatio =
+                  MediaQuery.devicePixelRatioOf(context);
+              final _MapBaseCacheKey baseCacheKey = _MapBaseCacheKey(
+                data: projectedData,
+                countsSignature: countsSignature,
+                lineColor: lineColor,
+                boundaryColor: boundaryColor,
+                devicePixelRatioKey: (devicePixelRatio * 1000).round(),
+              );
+              final ui.Image? baseImage = _baseMapImageCache[baseCacheKey];
+              _ensureBaseMapImage(
+                key: baseCacheKey,
+                data: projectedData,
+                counts: widget.counts,
+                lineColor: lineColor,
+                boundaryColor: boundaryColor,
+                devicePixelRatio: devicePixelRatio,
+              );
+              if (widget.preferRasterBaseMap && baseImage == null) {
+                return const Center(
+                  child: SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              }
               return GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTapDown: (TapDownDetails details) {
@@ -173,12 +287,16 @@ class _ProvinceMapViewState extends State<ProvinceMapView> {
                   painter: _ProvinceMapPainter(
                     data: projectedData,
                     counts: widget.counts,
+                    countsSignature: countsSignature,
                     selectedProvince: widget.selectedProvince,
-                    lineColor: Theme.of(context).dividerColor,
-                    boundaryColor:
-                        Theme.of(context).colorScheme.onSurfaceVariant,
-                    labelColor: Theme.of(context).textTheme.bodySmall?.color ??
-                        Colors.black54,
+                    lineColor: lineColor,
+                    boundaryColor: boundaryColor,
+                    baseImage: baseImage,
+                    labelColor: const Color(0xFF172017),
+                    labelPlateColor:
+                        Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFFEFF5EF).withOpacity(0.94)
+                            : Colors.white.withOpacity(0.84),
                   ),
                 ),
               );
@@ -196,7 +314,40 @@ class _ProvinceMapViewState extends State<ProvinceMapView> {
         cached.size == size) {
       return cached;
     }
-    return _projectedData = _projectChinaData(data, size);
+    final _ProjectionCacheKey cacheKey = _ProjectionCacheKey(data, size);
+    return _projectedData =
+        _projectedChinaDataCache[cacheKey] ??= _projectChinaData(data, size);
+  }
+
+  void _ensureBaseMapImage({
+    required _MapBaseCacheKey key,
+    required _ProjectedChinaData data,
+    required Map<String, int> counts,
+    required Color lineColor,
+    required Color boundaryColor,
+    required double devicePixelRatio,
+  }) {
+    if (_baseMapImageCache.containsKey(key) ||
+        _baseMapImageFutures.containsKey(key)) {
+      return;
+    }
+    _baseMapImageFutures[key] = _rasterizeBaseMap(
+      data: data,
+      counts: counts,
+      lineColor: lineColor,
+      boundaryColor: boundaryColor,
+      devicePixelRatio: devicePixelRatio,
+    ).then((ui.Image image) {
+      _baseMapImageCache[key] = image;
+      _baseMapImageFutures.remove(key);
+      if (mounted) {
+        setState(() {});
+      }
+      return image;
+    }).catchError((Object error, StackTrace stackTrace) {
+      _baseMapImageFutures.remove(key);
+      throw error;
+    });
   }
 }
 
@@ -204,77 +355,71 @@ class _ProvinceMapPainter extends CustomPainter {
   const _ProvinceMapPainter({
     required this.data,
     required this.counts,
+    required this.countsSignature,
     required this.selectedProvince,
     required this.lineColor,
     required this.boundaryColor,
+    required this.baseImage,
     required this.labelColor,
+    required this.labelPlateColor,
   });
 
   final _ProjectedChinaData data;
   final Map<String, int> counts;
+  final int countsSignature;
   final String? selectedProvince;
   final Color lineColor;
   final Color boundaryColor;
+  final ui.Image? baseImage;
   final Color labelColor;
+  final Color labelPlateColor;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint border = Paint()
-      ..color = lineColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _provinceStrokeWidth
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
     final Paint selectedBorder = Paint()
       ..color = const Color(0xFF2B6E38)
       ..style = PaintingStyle.stroke
       ..strokeWidth = _provinceStrokeWidth
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round;
-    final Paint officialBoundary = Paint()
-      ..color = boundaryColor.withOpacity(0.82)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _provinceStrokeWidth
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
 
-    for (final _ProjectedProvince province in data.provinces) {
-      final int count = counts[province.name] ?? 0;
-      final bool selected = selectedProvince == province.name;
-      final Paint fill = Paint()..color = provinceColor(count, selected);
-      for (final Path path in province.paths) {
-        canvas.drawPath(path, fill);
-      }
-    }
-
-    for (final _ProjectedProvince province in data.provinces) {
-      for (final Path path in province.paths) {
-        canvas.drawPath(path, border);
-      }
-    }
-
-    for (final _ProjectedBoundary boundary in data.boundaries) {
-      for (final Path path in boundary.paths) {
-        canvas.drawPath(path, officialBoundary);
-      }
+    if (baseImage != null) {
+      canvas.drawImageRect(
+        baseImage!,
+        Rect.fromLTWH(
+          0,
+          0,
+          baseImage!.width.toDouble(),
+          baseImage!.height.toDouble(),
+        ),
+        Offset.zero & size,
+        Paint(),
+      );
+    } else {
+      _drawBaseMap(canvas, data, counts, lineColor, boundaryColor);
     }
 
     if (selectedProvince != null) {
       final _ProjectedProvince? province =
           data.provinceByName(selectedProvince!);
       if (province != null) {
+        final Paint selectedFill = Paint()
+          ..color = provinceColor(counts[selectedProvince] ?? 0, true);
+        for (final Path path in province.paths) {
+          canvas.drawPath(path, selectedFill);
+        }
         for (final Path path in province.paths) {
           canvas.drawPath(path, selectedBorder);
         }
         final int count = counts[selectedProvince] ?? 0;
         _drawText(canvas, '${_shortName(selectedProvince!)}  $count次',
-            province.labelCenter, 11, labelColor);
+            province.labelCenter, 11, labelColor, labelPlateColor);
       }
     }
   }
 
-  void _drawText(
-      Canvas canvas, String text, Offset center, double size, Color color) {
+  void _drawText(Canvas canvas, String text, Offset center, double size,
+      Color color, Color plateColor) {
     final TextPainter painter = TextPainter(
       text: TextSpan(
           text: text,
@@ -290,7 +435,7 @@ class _ProvinceMapPainter extends CustomPainter {
           height: painter.height + 8),
       const Radius.circular(12),
     );
-    canvas.drawRRect(plate, Paint()..color = Colors.white.withOpacity(0.78));
+    canvas.drawRRect(plate, Paint()..color = plateColor);
     painter.paint(
         canvas, center - Offset(painter.width / 2, painter.height / 2));
   }
@@ -298,12 +443,92 @@ class _ProvinceMapPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ProvinceMapPainter oldDelegate) {
     return oldDelegate.data != data ||
-        oldDelegate.counts != counts ||
+        oldDelegate.countsSignature != countsSignature ||
         oldDelegate.selectedProvince != selectedProvince ||
         oldDelegate.lineColor != lineColor ||
         oldDelegate.boundaryColor != boundaryColor ||
-        oldDelegate.labelColor != labelColor;
+        oldDelegate.baseImage != baseImage ||
+        oldDelegate.labelColor != labelColor ||
+        oldDelegate.labelPlateColor != labelPlateColor;
   }
+}
+
+void _drawBaseMap(
+  Canvas canvas,
+  _ProjectedChinaData data,
+  Map<String, int> counts,
+  Color lineColor,
+  Color boundaryColor,
+) {
+  final Paint border = Paint()
+    ..color = lineColor
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = _provinceStrokeWidth
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round;
+  final Paint officialBoundary = Paint()
+    ..color = boundaryColor.withOpacity(0.82)
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = _provinceStrokeWidth
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.round;
+
+  for (final _ProjectedProvince province in data.provinces) {
+    final int count = counts[province.name] ?? 0;
+    final Paint fill = Paint()..color = provinceColor(count, false);
+    for (final Path path in province.paths) {
+      canvas.drawPath(path, fill);
+    }
+  }
+
+  for (final _ProjectedProvince province in data.provinces) {
+    for (final Path path in province.paths) {
+      canvas.drawPath(path, border);
+    }
+  }
+
+  for (final _ProjectedBoundary boundary in data.boundaries) {
+    for (final Path path in boundary.paths) {
+      canvas.drawPath(path, officialBoundary);
+    }
+  }
+}
+
+Future<ui.Image> _rasterizeBaseMap({
+  required _ProjectedChinaData data,
+  required Map<String, int> counts,
+  required Color lineColor,
+  required Color boundaryColor,
+  required double devicePixelRatio,
+}) async {
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final int imageWidth =
+      math.max(1, (data.size.width * devicePixelRatio).ceil());
+  final int imageHeight =
+      math.max(1, (data.size.height * devicePixelRatio).ceil());
+  final Canvas canvas = Canvas(
+    recorder,
+    Rect.fromLTWH(0, 0, imageWidth.toDouble(), imageHeight.toDouble()),
+  )..scale(devicePixelRatio, devicePixelRatio);
+  _drawBaseMap(canvas, data, counts, lineColor, boundaryColor);
+  final ui.Picture picture = recorder.endRecording();
+  final ui.Image image = await picture.toImage(imageWidth, imageHeight);
+  picture.dispose();
+  return image;
+}
+
+int _countsSignature(Map<String, int> counts) {
+  if (counts.isEmpty) {
+    return 0;
+  }
+  final List<MapEntry<String, int>> entries = counts.entries
+      .map((MapEntry<String, int> entry) =>
+          MapEntry<String, int>(entry.key, entry.value))
+      .toList(growable: false)
+    ..sort((MapEntry<String, int> a, MapEntry<String, int> b) =>
+        a.key.compareTo(b.key));
+  return Object.hashAll(entries.map(
+      (MapEntry<String, int> entry) => Object.hash(entry.key, entry.value)));
 }
 
 _ProjectedChinaData _projectChinaData(GeoChinaData data, Size size) {
@@ -325,9 +550,8 @@ _ProjectedChinaData _projectChinaData(GeoChinaData data, Size size) {
   );
 }
 
-Future<GeoChinaData> _loadChinaGeoData() async {
-  final String raw =
-      await rootBundle.loadString('assets/data/china_provinces.geojson');
+Future<GeoChinaData> _loadChinaGeoData(String assetPath) async {
+  final String raw = await rootBundle.loadString(assetPath);
   final Map<String, dynamic> json = jsonDecode(raw) as Map<String, dynamic>;
   final List<dynamic> features = json['features'] as List<dynamic>;
   final List<GeoProvince> provinces = <GeoProvince>[];
@@ -396,8 +620,7 @@ List<List<Offset>> displayedBoundaryLinesForFeature(
 
   final List<List<Offset>> lines = _parseLines(geometry);
   return lines
-      .where((List<Offset> line) =>
-          line.isNotEmpty && line.every((Offset point) => point.dy < 23))
+      .where((List<Offset> line) => line.isNotEmpty)
       .take(southChinaSeaDashCount)
       .toList(growable: false);
 }

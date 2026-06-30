@@ -234,7 +234,22 @@ class SettingsScreen extends StatelessWidget {
           icon:
               Image.asset('assets/images/app_icon.png', width: 58, height: 58),
           title: const Text('归途'),
-          content: const Text('归途\n0.2.1 开源练习版\n开发者：SySH'),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text('归途\n0.2.2\n开发者：SySH'),
+              SizedBox(height: 12),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _GithubMark(size: 18),
+                  SizedBox(width: 8),
+                  Text('Github：SySH-7/guitu'),
+                ],
+              ),
+            ],
+          ),
           actions: <Widget>[
             TextButton(
                 onPressed: () => Navigator.of(context).pop(),
@@ -276,6 +291,65 @@ class SettingsScreen extends StatelessWidget {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('全部记录已清空')));
     }
+  }
+}
+
+class _GithubMark extends StatelessWidget {
+  const _GithubMark({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size.square(size),
+      painter:
+          _GithubMarkPainter(color: Theme.of(context).colorScheme.onSurface),
+    );
+  }
+}
+
+class _GithubMarkPainter extends CustomPainter {
+  const _GithubMarkPainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    final Path head = Path()
+      ..moveTo(size.width * 0.22, size.height * 0.43)
+      ..lineTo(size.width * 0.20, size.height * 0.20)
+      ..lineTo(size.width * 0.39, size.height * 0.29)
+      ..quadraticBezierTo(
+        size.width * 0.50,
+        size.height * 0.24,
+        size.width * 0.61,
+        size.height * 0.29,
+      )
+      ..lineTo(size.width * 0.80, size.height * 0.20)
+      ..lineTo(size.width * 0.78, size.height * 0.43)
+      ..quadraticBezierTo(
+        size.width * 0.88,
+        size.height * 0.76,
+        size.width * 0.50,
+        size.height * 0.86,
+      )
+      ..quadraticBezierTo(
+        size.width * 0.12,
+        size.height * 0.76,
+        size.width * 0.22,
+        size.height * 0.43,
+      )
+      ..close();
+    canvas.drawPath(head, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _GithubMarkPainter oldDelegate) {
+    return oldDelegate.color != color;
   }
 }
 

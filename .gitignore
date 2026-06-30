@@ -36,6 +36,7 @@ migrate_working_dir/
 /backups/
 /deliverables/
 /assets/data/china_provinces.geojson
+/assets/data/china_cities.geojson
 /android/.gradle/
 /android/local.properties
 *.jks
