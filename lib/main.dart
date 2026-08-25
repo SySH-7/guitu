@@ -6,9 +6,13 @@ import 'package:flutter/services.dart';
 
 import 'models/app_data.dart';
 import 'services/archive_store.dart';
+import 'services/device_entry_service.dart';
+import 'services/region_lookup_service.dart';
 import 'ui/archive_kind_ui.dart';
 import 'ui/charts.dart';
 import 'ui/map_painter.dart';
+import 'ui/photo_trip_discovery.dart';
+import 'ui/quick_entry_flow.dart';
 import 'ui/record_form_sheet.dart';
 
 part 'shell.dart';

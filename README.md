@@ -10,7 +10,7 @@
   <img src="https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white" alt="Flutter">
   <img src="https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white" alt="Dart">
   <img src="https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white" alt="Android">
-  <img src="https://img.shields.io/badge/Version-0.2.2-2B6E38" alt="Version 0.2.2">
+  <img src="https://img.shields.io/badge/Version-0.3.1-2B6E38" alt="Version 0.3.1">
   <img src="https://img.shields.io/badge/License-MIT-111111" alt="MIT License">
 </p>
 
@@ -80,7 +80,7 @@ android/                      # Android 原生工程
 
 ## 下载体验
 
-Android 安装包可在仓库的 [Releases](https://github.com/SySH-7/guitu/releases) 页面下载。当前完整安装包内置地图数据，安装后旅途页可以正常显示省级/市级足迹地图。
+最新 Android 安装包可直接下载：[归途 v0.3.1 正式签名 APK](releases/guitu-v0.3.1-android-signed.apk)。当前完整安装包内置地图数据，安装后旅途页可以正常显示省级/市级足迹地图。
 
 源码仓库不包含第三方 GeoJSON。使用源码自行运行时，如未在 `assets/data/` 中配置兼容地图数据，旅途页会显示“地图数据未配置”，阅读、影视、统计、导入导出等其他功能不受影响。
 
@@ -155,6 +155,12 @@ build/app/outputs/flutter-apk/
 本项目属于个人技术展示作品，不是官方地图产品，也不提供导航、定位、测绘或互联网地图服务。应用内足迹地图仅用于个人记录中的行政区划可视化统计，不作为行政边界认定或完整标准地图使用。源码仓库中的地图绘制代码只做屏幕适配所需的等比例渲染、填色和交互，不修改原始地图数据文件。免责声明不能替代法律法规要求；公开传播地图数据、二次发布含地图的构建或商业使用前，使用者应自行确认地图审核、数据授权和其他合规要求。
 
 市级足迹地图优先使用天地图市级行政区划面数据。对于数据源中未提供独立市级面的直辖市、港澳台及部分省直管或特殊县级区域，应用使用同源省级行政区划面作为可视化兜底，以避免足迹区域空缺。
+
+## 后续计划
+
+- 适配百度贴吧小程序上架。
+- 加入自接 API AI 功能。
+- 其他更多功能展示优化。
 
 ## 开源许可
 

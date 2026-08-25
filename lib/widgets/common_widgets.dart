@@ -465,10 +465,12 @@ class _ProvinceSummary extends StatelessWidget {
   const _ProvinceSummary({
     required this.entries,
     required this.selectedProvince,
+    required this.onSelected,
   });
 
   final List<MapEntry<String, int>> entries;
   final String? selectedProvince;
+  final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -488,31 +490,47 @@ class _ProvinceSummary extends StatelessWidget {
     return Column(
       children: visible.map((MapEntry<String, int> entry) {
         final bool selected = entry.key == selectedProvince;
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          decoration: BoxDecoration(
-            color: provinceColor(entry.value, selected)
-                .withOpacity(selected ? 1 : 0.72),
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Material(
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(16),
-            border:
-                Border.all(color: const Color(0xFF5B9B66).withOpacity(0.16)),
-          ),
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                child: Text(entry.key,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          color: const Color(0xFF1E3523),
-                          fontWeight: FontWeight.w600,
-                        )),
+            child: InkWell(
+              onTap: () => onSelected(entry.key),
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                decoration: BoxDecoration(
+                  color: provinceColor(entry.value, selected)
+                      .withOpacity(selected ? 1 : 0.72),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF5B9B66).withOpacity(0.16),
+                  ),
+                ),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        entry.key,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: const Color(0xFF1E3523),
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ),
+                    Text(
+                      '${entry.value}次',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: const Color(0xFF1E3523),
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                  ],
+                ),
               ),
-              Text('${entry.value}次',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: const Color(0xFF1E3523),
-                        fontWeight: FontWeight.w700,
-                      )),
-            ],
+            ),
           ),
         );
       }).toList(growable: false),

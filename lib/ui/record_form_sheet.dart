@@ -5,11 +5,26 @@ import '../models/app_data.dart';
 import '../services/archive_store.dart';
 import 'charts.dart';
 
+class RecordFormPrefill {
+  const RecordFormPrefill({
+    this.title,
+    this.province,
+    this.city,
+    this.date,
+  });
+
+  final String? title;
+  final String? province;
+  final String? city;
+  final DateTime? date;
+}
+
 Future<ArchiveKind?> showArchiveKindChooser(BuildContext context) {
   final Color textColor =
       Theme.of(context).textTheme.titleMedium?.color ?? Colors.black;
   return showModalBottomSheet<ArchiveKind>(
     context: context,
+    isScrollControlled: true,
     showDragHandle: true,
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     shape: const RoundedRectangleBorder(
@@ -17,7 +32,8 @@ Future<ArchiveKind?> showArchiveKindChooser(BuildContext context) {
     ),
     builder: (BuildContext context) {
       return SafeArea(
-        child: Padding(
+        top: false,
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -135,10 +151,12 @@ class RecordFormSheet extends StatefulWidget {
     super.key,
     required this.kind,
     required this.store,
+    this.prefill,
   });
 
   final ArchiveKind kind;
   final ArchiveStore store;
+  final RecordFormPrefill? prefill;
 
   @override
   State<RecordFormSheet> createState() => _RecordFormSheetState();
@@ -163,7 +181,22 @@ class _RecordFormSheetState extends State<RecordFormSheet> {
   void initState() {
     super.initState();
     _category = _categories.first;
+    final RecordFormPrefill? prefill = widget.prefill;
+    if (prefill?.title?.trim().isNotEmpty == true) {
+      _titleController.text = prefill!.title!.trim();
+    }
+    if (widget.kind == ArchiveKind.place &&
+        prefill?.province != null &&
+        chinaCities.containsKey(prefill!.province)) {
+      _province = prefill.province!;
+    }
     _city = chinaCities[_province]!.first;
+    if (widget.kind == ArchiveKind.place &&
+        prefill?.city != null &&
+        chinaCities[_province]!.contains(prefill!.city)) {
+      _city = prefill.city!;
+    }
+    _date = prefill?.date ?? _date;
   }
 
   @override

@@ -166,7 +166,18 @@ class _TravelScreenState extends State<TravelScreen> {
           ),
           const SizedBox(height: 10),
           _ProvinceSummary(
-              entries: summaryEntries, selectedProvince: selectedRegion),
+            entries: summaryEntries,
+            selectedProvince: selectedRegion,
+            onSelected: (String value) {
+              setState(() {
+                if (isCityMap) {
+                  _selectedCity = value;
+                } else {
+                  _selectedProvince = value;
+                }
+              });
+            },
+          ),
         ],
       ),
     );

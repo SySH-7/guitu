@@ -142,15 +142,17 @@ class DocumentAccessGrant {
 }
 
 class ArchiveStore extends ChangeNotifier {
+  static const String fixedUserName = '归途';
+
   final ArchivePlatformStorage _storage = ArchivePlatformStorage();
 
   bool _loaded = false;
   bool darkMode = false;
-  String userName = '我的归途';
   int avatarIndex = 0;
   List<ArchiveEntry> entries = <ArchiveEntry>[];
 
   bool get isLoaded => _loaded;
+  String get userName => fixedUserName;
 
   Future<void> load() async {
     final String? raw = await _storage.readSnapshot();
@@ -170,16 +172,6 @@ class ArchiveStore extends ChangeNotifier {
     await _persist();
   }
 
-  Future<void> setUserName(String value) async {
-    final String trimmed = value.trim();
-    if (trimmed.isEmpty) {
-      return;
-    }
-    userName = trimmed;
-    notifyListeners();
-    await _persist();
-  }
-
   Future<void> setAvatarIndex(int value) async {
     avatarIndex = value;
     notifyListeners();
@@ -188,6 +180,16 @@ class ArchiveStore extends ChangeNotifier {
 
   Future<void> addEntry(ArchiveEntry entry) async {
     entries = <ArchiveEntry>[entry, ...entries];
+    notifyListeners();
+    await _persist();
+  }
+
+  Future<void> addEntries(Iterable<ArchiveEntry> newEntries) async {
+    final List<ArchiveEntry> values = newEntries.toList(growable: false);
+    if (values.isEmpty) {
+      return;
+    }
+    entries = <ArchiveEntry>[...values, ...entries];
     notifyListeners();
     await _persist();
   }
@@ -260,7 +262,18 @@ class ArchiveStore extends ChangeNotifier {
     final Iterable<ArchiveEntry> filtered =
         entries.where((ArchiveEntry entry) => entry.kind == kind);
     if (kind == ArchiveKind.place) {
-      return filtered.length;
+      return filtered
+          .map((ArchiveEntry entry) {
+            final String province = entry.province?.trim() ?? '';
+            final String city = entry.city?.trim() ?? '';
+            if (province.isNotEmpty || city.isNotEmpty) {
+              return '$province\u0000$city';
+            }
+            return entry.title.trim();
+          })
+          .where((String location) => location.isNotEmpty)
+          .toSet()
+          .length;
     }
     return filtered.fold<int>(
         0, (int total, ArchiveEntry entry) => total + entry.amount);
@@ -389,7 +402,6 @@ class ArchiveStore extends ChangeNotifier {
     return <String, dynamic>{
       'schema': 'guitu.archive.v1',
       'exportedAt': DateTime.now().toIso8601String(),
-      'userName': userName,
       'darkMode': darkMode,
       'avatarIndex': avatarIndex,
       'entries': entries
@@ -408,9 +420,6 @@ class ArchiveStore extends ChangeNotifier {
         json = Map<String, dynamic>.from(decoded as Map<dynamic, dynamic>);
       }
 
-      userName = (json['userName'] as String?)?.trim().isNotEmpty == true
-          ? json['userName'] as String
-          : '我的归途';
       darkMode = (json['darkMode'] as bool?) ?? false;
       avatarIndex =
           ((json['avatarIndex'] as num?)?.round() ?? 0).clamp(0, 3).toInt();
@@ -426,7 +435,6 @@ class ArchiveStore extends ChangeNotifier {
       if (!fallbackToSeed) {
         rethrow;
       }
-      userName = '我的归途';
       darkMode = false;
       avatarIndex = 0;
       entries = <ArchiveEntry>[];

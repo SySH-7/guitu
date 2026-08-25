@@ -90,6 +90,7 @@ class ArchiveShell extends StatefulWidget {
 
 class _ArchiveShellState extends State<ArchiveShell> {
   int _index = 0;
+  bool _quickEntryExpanded = false;
 
   @override
   void initState() {
@@ -115,6 +116,16 @@ class _ArchiveShellState extends State<ArchiveShell> {
     if (!mounted || kind == null) {
       return;
     }
+    await _openRecordForm(kind);
+  }
+
+  Future<void> _openRecordForm(
+    ArchiveKind kind, {
+    RecordFormPrefill? prefill,
+  }) async {
+    if (!mounted) {
+      return;
+    }
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -124,7 +135,92 @@ class _ArchiveShellState extends State<ArchiveShell> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       builder: (BuildContext context) =>
-          RecordFormSheet(kind: kind, store: widget.store),
+          RecordFormSheet(kind: kind, store: widget.store, prefill: prefill),
+    );
+  }
+
+  Future<void> _openQuickCoverEntry() async {
+    final String? title = await QuickEntryFlow.pickConfirmedTitle(context);
+    if (!mounted || title == null) {
+      return;
+    }
+    final ArchiveKind? kind = await QuickEntryFlow.chooseBookOrFilm(context);
+    if (!mounted || kind == null) {
+      return;
+    }
+    await _openRecordForm(kind, prefill: RecordFormPrefill(title: title));
+  }
+
+  Future<void> _openQuickLocationEntry() async {
+    if (!mounted) {
+      return;
+    }
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => const _QuickLocationLoadingDialog(),
+    );
+    RegionMatch? region;
+    LocationSnapshot? location;
+    Object? error;
+    try {
+      location = await DeviceEntryService.instance.currentLocation();
+      region = await RegionLookupService.instance.lookup(
+        latitude: location.latitude,
+        longitude: location.longitude,
+      );
+    } catch (caught) {
+      error = caught;
+    } finally {
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+      }
+    }
+    if (!mounted) {
+      return;
+    }
+    if (error != null) {
+      await _showQuickLocationError(error);
+      return;
+    }
+    if (region == null || location == null) {
+      await _showQuickLocationError(null);
+      return;
+    }
+    await _openRecordForm(
+      ArchiveKind.place,
+      prefill: RecordFormPrefill(
+        province: region.province,
+        city: region.city,
+        date: location.timestamp,
+      ),
+    );
+  }
+
+  Future<void> _showQuickLocationError(Object? error) {
+    String message = '未能将当前位置转换为省市，请检查网络外的本地定位与系统定位设置后重试。';
+    if (error is PlatformException) {
+      switch (error.code) {
+        case 'LOCATION_PERMISSION_DENIED':
+          message = '未获得定位权限。允许定位后可自动预填省市，仍可继续手动新增地点。';
+        case 'LOCATION_SERVICE_DISABLED':
+          message = '系统定位服务未开启。开启后可自动预填省市，仍可继续手动新增地点。';
+        case 'LOCATION_TIMEOUT':
+          message = '定位超时，请移动到信号更好的位置后重试。';
+      }
+    }
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('无法获取当前位置'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('知道了'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -154,11 +250,179 @@ class _ArchiveShellState extends State<ArchiveShell> {
             bottom: 12,
             child: _BottomNav(
               selectedIndex: _index,
-              onSelected: (int value) => setState(() => _index = value),
+              onSelected: (int value) => setState(() {
+                _index = value;
+                _quickEntryExpanded = false;
+              }),
               onAdd: _openAddFlow,
             ),
           ),
+          if (_index != 3)
+            Positioned(
+              right: 26,
+              bottom: 106,
+              child: _QuickEntryFab(
+                expanded: _quickEntryExpanded,
+                onToggle: () => setState(
+                  () => _quickEntryExpanded = !_quickEntryExpanded,
+                ),
+                onCover: () async {
+                  setState(() => _quickEntryExpanded = false);
+                  await _openQuickCoverEntry();
+                },
+                onLocation: () async {
+                  setState(() => _quickEntryExpanded = false);
+                  await _openQuickLocationEntry();
+                },
+              ),
+            ),
         ],
+      ),
+    );
+  }
+}
+
+class _QuickLocationLoadingDialog extends StatelessWidget {
+  const _QuickLocationLoadingDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 48),
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const SizedBox(
+              width: 26,
+              height: 26,
+              child: CircularProgressIndicator(strokeWidth: 2.6),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '正在获取当前位置',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              '将使用内置行政区数据预填省市',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickEntryFab extends StatelessWidget {
+  const _QuickEntryFab({
+    required this.expanded,
+    required this.onToggle,
+    required this.onCover,
+    required this.onLocation,
+  });
+
+  final bool expanded;
+  final VoidCallback onToggle;
+  final VoidCallback onCover;
+  final VoidCallback onLocation;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: <Widget>[
+        AnimatedSize(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          child: expanded
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: <Widget>[
+                    _QuickFabCircle(
+                      tooltip: '拍照识别书影',
+                      icon: CupertinoIcons.camera_fill,
+                      foreground: const Color(0xFFF7F7F3),
+                      background: const Color(0xFF20211F),
+                      onTap: onCover,
+                    ),
+                    const SizedBox(height: 12),
+                    _QuickFabCircle(
+                      tooltip: '记录当前位置',
+                      icon: CupertinoIcons.location_solid,
+                      foreground: const Color(0xFF20211F),
+                      background: const Color(0xFFF1F0EB),
+                      borderColor: Theme.of(context).dividerColor,
+                      onTap: onLocation,
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                )
+              : const SizedBox.shrink(),
+        ),
+        _QuickFabCircle(
+          tooltip: expanded ? '收起快捷录入' : '快捷录入',
+          icon: expanded ? CupertinoIcons.xmark : CupertinoIcons.ellipsis,
+          foreground: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF171A18)
+              : Colors.white,
+          background: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFFECEFED)
+              : const Color(0xFF171A18),
+          onTap: onToggle,
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickFabCircle extends StatelessWidget {
+  const _QuickFabCircle({
+    required this.tooltip,
+    required this.icon,
+    required this.foreground,
+    required this.background,
+    required this.onTap,
+    this.borderColor,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final Color foreground;
+  final Color background;
+  final Color? borderColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: background,
+        shape: CircleBorder(side: BorderSide(color: borderColor ?? background)),
+        elevation: 6,
+        shadowColor: Colors.black.withOpacity(0.24),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Semantics(
+            button: true,
+            label: tooltip,
+            child: SizedBox(
+              width: 52,
+              height: 52,
+              child: Icon(icon, color: foreground, size: 23),
+            ),
+          ),
+        ),
       ),
     );
   }

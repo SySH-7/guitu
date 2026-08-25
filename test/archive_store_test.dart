@@ -166,9 +166,8 @@ void main() {
     expect(entries.single, containsPair('title', '测试书籍'));
   });
 
-  test('JSON 导出导入可以还原用户设置和记录', () async {
+  test('JSON 导出导入可以还原设置和记录，且不包含用户名', () async {
     final ArchiveStore source = ArchiveStore()
-      ..userName = 'SySH'
       ..darkMode = true
       ..avatarIndex = 2
       ..entries = <ArchiveEntry>[
@@ -199,6 +198,7 @@ void main() {
     final String raw = source.exportJson();
     final Map<String, dynamic> exported =
         jsonDecode(raw) as Map<String, dynamic>;
+    expect(exported, isNot(contains('userName')));
     final List<dynamic> exportedEntries = exported['entries'] as List<dynamic>;
     final Map<String, dynamic> exportedPlace =
         exportedEntries.last as Map<String, dynamic>;
@@ -207,7 +207,7 @@ void main() {
 
     await restored.replaceFromJson(raw);
 
-    expect(restored.userName, 'SySH');
+    expect(restored.userName, ArchiveStore.fixedUserName);
     expect(restored.darkMode, isTrue);
     expect(restored.avatarIndex, 2);
     expect(restored.entries, hasLength(2));

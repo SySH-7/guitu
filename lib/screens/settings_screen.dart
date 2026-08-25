@@ -25,6 +25,11 @@ class SettingsScreen extends StatelessWidget {
                 onChanged: store.setDarkMode),
           ),
           _SettingTile(
+            icon: CupertinoIcons.photo_on_rectangle,
+            title: '相册批量导入地点',
+            onTap: () => PhotoTripDiscovery.start(context, store),
+          ),
+          _SettingTile(
             icon: CupertinoIcons.square_arrow_down,
             title: '导入数据',
             onTap: () => _importData(context, store),
@@ -238,7 +243,7 @@ class SettingsScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text('归途\n0.2.2\n开发者：SySH'),
+              Text('归途\nv0.3.1\n开发者：SySH'),
               SizedBox(height: 12),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -371,64 +376,31 @@ class _ProfileHeader extends StatelessWidget {
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14),
-              onTap: () => _editName(context),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(store.userName,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(fontWeight: FontWeight.w700)),
-                    const SizedBox(height: 6),
-                    Text('记录生活的每一刻',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.color
-                                ?.withOpacity(0.58))),
-                  ],
-                ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(ArchiveStore.fixedUserName,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 6),
+                  Text('记录生活的每一刻',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.color
+                              ?.withOpacity(0.58))),
+                ],
               ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  Future<void> _editName(BuildContext context) async {
-    final TextEditingController controller =
-        TextEditingController(text: store.userName);
-    final String? value = await showDialog<String>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('编辑昵称'),
-          content: TextField(
-              controller: controller,
-              autofocus: true,
-              decoration: const InputDecoration(hintText: '输入昵称')),
-          actions: <Widget>[
-            TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('取消')),
-            FilledButton(
-                onPressed: () => Navigator.of(context).pop(controller.text),
-                child: const Text('保存')),
-          ],
-        );
-      },
-    );
-    controller.dispose();
-    if (value != null) {
-      await store.setUserName(value);
-    }
   }
 
   Future<void> _chooseAvatar(BuildContext context) async {
