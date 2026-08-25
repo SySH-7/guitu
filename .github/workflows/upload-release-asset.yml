@@ -1,0 +1,30 @@
+name: Upload release asset
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub release tag
+        required: true
+        default: v0.3.1
+        type: string
+      asset_path:
+        description: APK path relative to the repository root
+        required: true
+        default: releases/guitu-v0.3.1-android-signed.apk
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload or replace the APK asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_ASSET: ${{ inputs.asset_path }}
+        run: gh release upload "$RELEASE_TAG" "$RELEASE_ASSET" --clobber
