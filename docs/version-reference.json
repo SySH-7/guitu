@@ -1,0 +1,28 @@
+{
+  "platformVersion": "v179215220644",
+  "reviewStatus": "Passed, reported by project owner on 2026-10-20; not a publication claim",
+  "approvedBuildSha256": "417de0e5991c4e7050a11f515556aa5c6eb5a8ef38aa41565e5924dc2f6be610",
+  "publicRuntimeFiles": {
+    "src/app.js": "b67e2499c8835b36237dd4bd159cc1860c915c70e8cc44abdf901016c36f6467",
+    "src/core.js": "4e06c829c6fa937536025f8d635807b014f107bcbd34292d8084177f0d25051b",
+    "src/cloud-codec.js": "480b8edc25c8e82f1f3756985deb85db66617185da7016cab84ce8514b308cb9",
+    "src/style.css": "6024bba0f3584f254bf5c5095235137fdd44850802bec67d8f39e36a5183f5d7",
+    "src/template.html": "4cd37a0c4195d0f31cf119120284a3428869bc4fbeb1a8af7524b03196120053",
+    "src/regions.json": "95b44989b3cd74e034f4418b2df2b63c4a3554c5e09bac078ec0234d36d15595",
+    "src/province-points.json": "54218c0a63a2b7c2cbce0dabc18ef2d6ac4e0bd4cf2075056dd3b681fd2ab99d",
+    "build.py": "a34ee992c649acd148810c9092607978da819f8ed66f21948120083c958b7575"
+  },
+  "publicRuntimeMatchesLocalSource": true,
+  "publicBuildDifferences": [
+    "No production Baidu Maps AK",
+    "Private third-party-derived city coordinate cache omitted; empty public placeholder, existing online geocoder fallback retained"
+  ],
+  "excluded": [
+    "Production HTML and development QR codes",
+    "Platform account and review payloads",
+    "Abandoned audit proxies and credentials",
+    "Real user/cloud records",
+    "Private city coordinate table"
+  ],
+  "publicBuildEqualsApprovedLocalWhenMaskingOnlyCityCacheAndAK": true
+}

@@ -1,0 +1,17 @@
+{
+  "name": "guitu-tieba-h5",
+  "version": "0.2.2",
+  "private": true,
+  "description": "归途 · 百度贴吧 H5 适配版",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "build": "python3 build.py",
+    "test": "node --test test/core.test.js test/cloud-compression.test.js",
+    "test:smoke": "node test/smoke.js",
+    "test:cloud": "node test/cloud-read-cache.js && node test/final-cloud-week-reset.js && node test/final-cloud-concurrency.js && node test/cloud-size-warning.js",
+    "test:guard": "python3 scripts/fetch-test-sdk.py && node test/cloud-verified-read.js",
+    "test:varied": "node test/final-varied-flows.js"
+  },
+  "devDependencies": { "playwright": "1.62.1" }
+}

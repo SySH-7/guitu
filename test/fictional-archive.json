@@ -1,0 +1,906 @@
+{
+  "schema": "guitu.archive.v1",
+  "userName": "我的归途",
+  "entries": [
+    {
+      "id": "fiction-book-1",
+      "kind": "book",
+      "title": "雨后书店",
+      "creator": "林青",
+      "category": "小说",
+      "date": "2026-01-15T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-2",
+      "kind": "book",
+      "title": "星光日记",
+      "creator": "陈禾",
+      "category": "小说",
+      "date": "2026-02-15T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-3",
+      "kind": "book",
+      "title": "山间来信",
+      "creator": "周岚",
+      "category": "小说",
+      "date": "2026-03-15T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-4",
+      "kind": "book",
+      "title": "海边的下午",
+      "creator": "许知",
+      "category": "小说",
+      "date": "2026-04-15T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-1",
+      "kind": "film",
+      "title": "漫长的夏天",
+      "creator": "陆明",
+      "category": "剧情",
+      "date": "2026-05-12T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-2",
+      "kind": "film",
+      "title": "月光列车",
+      "creator": "何川",
+      "category": "剧情",
+      "date": "2026-06-12T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-3",
+      "kind": "film",
+      "title": "城市的窗",
+      "creator": "宋安",
+      "category": "剧情",
+      "date": "2026-07-12T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-4",
+      "kind": "film",
+      "title": "回家的路",
+      "creator": "白宁",
+      "category": "剧情",
+      "date": "2026-08-12T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-1",
+      "kind": "place",
+      "title": "杭州市",
+      "province": "浙江省",
+      "city": "杭州市",
+      "date": "2026-05-20T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-2",
+      "kind": "place",
+      "title": "成都市",
+      "province": "四川省",
+      "city": "成都市",
+      "date": "2026-06-20T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-3",
+      "kind": "place",
+      "title": "广州市",
+      "province": "广东省",
+      "city": "广州市",
+      "date": "2026-07-20T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-4",
+      "kind": "place",
+      "title": "南京市",
+      "province": "江苏省",
+      "city": "南京市",
+      "date": "2026-08-20T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-5",
+      "kind": "book",
+      "title": "清晨的书页",
+      "creator": "陈禾",
+      "category": "历史",
+      "date": "2026-06-06T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-6",
+      "kind": "book",
+      "title": "远方的灯塔",
+      "creator": "周岚",
+      "category": "艺术",
+      "date": "2026-07-07T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-7",
+      "kind": "book",
+      "title": "林间小路",
+      "creator": "许知",
+      "category": "社科",
+      "date": "2026-08-08T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-8",
+      "kind": "book",
+      "title": "四季邮局",
+      "creator": "林青",
+      "category": "小说",
+      "date": "2026-09-09T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-9",
+      "kind": "book",
+      "title": "微风来信",
+      "creator": "陈禾",
+      "category": "历史",
+      "date": "2026-01-10T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-10",
+      "kind": "book",
+      "title": "海上日出",
+      "creator": "周岚",
+      "category": "艺术",
+      "date": "2026-02-11T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-11",
+      "kind": "book",
+      "title": "秋日散步",
+      "creator": "许知",
+      "category": "社科",
+      "date": "2026-03-12T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-12",
+      "kind": "book",
+      "title": "慢慢长大",
+      "creator": "林青",
+      "category": "小说",
+      "date": "2026-04-13T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-13",
+      "kind": "book",
+      "title": "旧城书简",
+      "creator": "陈禾",
+      "category": "历史",
+      "date": "2026-05-14T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-14",
+      "kind": "book",
+      "title": "花园里的猫",
+      "creator": "周岚",
+      "category": "艺术",
+      "date": "2026-06-15T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-15",
+      "kind": "book",
+      "title": "纸上的旅行",
+      "creator": "许知",
+      "category": "社科",
+      "date": "2026-07-16T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-16",
+      "kind": "book",
+      "title": "窗边的午后",
+      "creator": "林青",
+      "category": "小说",
+      "date": "2026-08-17T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-17",
+      "kind": "book",
+      "title": "星河笔记",
+      "creator": "陈禾",
+      "category": "历史",
+      "date": "2026-09-18T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-18",
+      "kind": "book",
+      "title": "山谷之声",
+      "creator": "周岚",
+      "category": "艺术",
+      "date": "2026-01-01T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-19",
+      "kind": "book",
+      "title": "夏末的雨",
+      "creator": "许知",
+      "category": "社科",
+      "date": "2026-02-02T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-20",
+      "kind": "book",
+      "title": "街角面包店",
+      "creator": "林青",
+      "category": "小说",
+      "date": "2026-03-03T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-21",
+      "kind": "book",
+      "title": "寻常的光",
+      "creator": "陈禾",
+      "category": "历史",
+      "date": "2026-04-04T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-22",
+      "kind": "book",
+      "title": "风从海边来",
+      "creator": "周岚",
+      "category": "艺术",
+      "date": "2026-05-05T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-23",
+      "kind": "book",
+      "title": "一座小小的桥",
+      "creator": "许知",
+      "category": "社科",
+      "date": "2026-06-06T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-24",
+      "kind": "book",
+      "title": "春天的颜色",
+      "creator": "林青",
+      "category": "小说",
+      "date": "2026-07-07T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-25",
+      "kind": "book",
+      "title": "灯下的故事",
+      "creator": "陈禾",
+      "category": "历史",
+      "date": "2026-08-08T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-26",
+      "kind": "book",
+      "title": "湖畔的树",
+      "creator": "周岚",
+      "category": "艺术",
+      "date": "2026-09-09T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-27",
+      "kind": "book",
+      "title": "晚霞列车",
+      "creator": "许知",
+      "category": "社科",
+      "date": "2026-01-10T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-28",
+      "kind": "book",
+      "title": "城市漫游",
+      "creator": "林青",
+      "category": "小说",
+      "date": "2026-02-11T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-29",
+      "kind": "book",
+      "title": "星光与树影",
+      "creator": "陈禾",
+      "category": "历史",
+      "date": "2026-03-12T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-book-30",
+      "kind": "book",
+      "title": "清凉的河岸",
+      "creator": "周岚",
+      "category": "艺术",
+      "date": "2026-04-13T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-5",
+      "kind": "film",
+      "title": "森林音乐会",
+      "creator": "陈禾",
+      "category": "喜剧",
+      "date": "2026-06-06T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-6",
+      "kind": "film",
+      "title": "云上的房间",
+      "creator": "周岚",
+      "category": "动画",
+      "date": "2026-07-07T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-7",
+      "kind": "film",
+      "title": "海风吹过时",
+      "creator": "许知",
+      "category": "纪录片",
+      "date": "2026-08-08T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-8",
+      "kind": "film",
+      "title": "小镇的一天",
+      "creator": "林青",
+      "category": "剧情",
+      "date": "2026-09-09T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-9",
+      "kind": "film",
+      "title": "晴天故事集",
+      "creator": "陈禾",
+      "category": "喜剧",
+      "date": "2026-01-10T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-10",
+      "kind": "film",
+      "title": "纸飞机之旅",
+      "creator": "周岚",
+      "category": "动画",
+      "date": "2026-02-11T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-11",
+      "kind": "film",
+      "title": "黎明之前",
+      "creator": "许知",
+      "category": "纪录片",
+      "date": "2026-03-12T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-12",
+      "kind": "film",
+      "title": "夏日书信",
+      "creator": "林青",
+      "category": "剧情",
+      "date": "2026-04-13T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-13",
+      "kind": "film",
+      "title": "窗外的月亮",
+      "creator": "陈禾",
+      "category": "喜剧",
+      "date": "2026-05-14T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-14",
+      "kind": "film",
+      "title": "山与海之间",
+      "creator": "周岚",
+      "category": "动画",
+      "date": "2026-06-15T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-15",
+      "kind": "film",
+      "title": "慢行时光",
+      "creator": "许知",
+      "category": "纪录片",
+      "date": "2026-07-16T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-16",
+      "kind": "film",
+      "title": "花开的地方",
+      "creator": "林青",
+      "category": "剧情",
+      "date": "2026-08-17T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-17",
+      "kind": "film",
+      "title": "深蓝色的夜",
+      "creator": "陈禾",
+      "category": "喜剧",
+      "date": "2026-09-18T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-18",
+      "kind": "film",
+      "title": "风铃小巷",
+      "creator": "周岚",
+      "category": "动画",
+      "date": "2026-01-01T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-19",
+      "kind": "film",
+      "title": "远山的路",
+      "creator": "许知",
+      "category": "纪录片",
+      "date": "2026-02-02T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-20",
+      "kind": "film",
+      "title": "新的清晨",
+      "creator": "林青",
+      "category": "剧情",
+      "date": "2026-03-03T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-21",
+      "kind": "film",
+      "title": "温柔的雨",
+      "creator": "陈禾",
+      "category": "喜剧",
+      "date": "2026-04-04T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-22",
+      "kind": "film",
+      "title": "街头的歌",
+      "creator": "周岚",
+      "category": "动画",
+      "date": "2026-05-05T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-23",
+      "kind": "film",
+      "title": "萤火之夏",
+      "creator": "许知",
+      "category": "纪录片",
+      "date": "2026-06-06T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-24",
+      "kind": "film",
+      "title": "周末列车",
+      "creator": "林青",
+      "category": "剧情",
+      "date": "2026-07-07T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-25",
+      "kind": "film",
+      "title": "橘子味黄昏",
+      "creator": "陈禾",
+      "category": "喜剧",
+      "date": "2026-08-08T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-26",
+      "kind": "film",
+      "title": "雨停以后",
+      "creator": "周岚",
+      "category": "动画",
+      "date": "2026-09-09T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-27",
+      "kind": "film",
+      "title": "白色风车",
+      "creator": "许知",
+      "category": "纪录片",
+      "date": "2026-01-10T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-28",
+      "kind": "film",
+      "title": "一封短笺",
+      "creator": "林青",
+      "category": "剧情",
+      "date": "2026-02-11T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-29",
+      "kind": "film",
+      "title": "海边的画室",
+      "creator": "陈禾",
+      "category": "喜剧",
+      "date": "2026-03-12T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-film-30",
+      "kind": "film",
+      "title": "草地上的云",
+      "creator": "周岚",
+      "category": "动画",
+      "date": "2026-04-13T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-5",
+      "kind": "place",
+      "title": "北京市",
+      "province": "北京市",
+      "city": "北京市",
+      "date": "2026-06-06T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-6",
+      "kind": "place",
+      "title": "上海市",
+      "province": "上海市",
+      "city": "上海市",
+      "date": "2026-07-07T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-7",
+      "kind": "place",
+      "title": "厦门市",
+      "province": "福建省",
+      "city": "厦门市",
+      "date": "2026-08-08T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-8",
+      "kind": "place",
+      "title": "武汉市",
+      "province": "湖北省",
+      "city": "武汉市",
+      "date": "2026-09-09T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-9",
+      "kind": "place",
+      "title": "西安市",
+      "province": "陕西省",
+      "city": "西安市",
+      "date": "2026-01-10T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-10",
+      "kind": "place",
+      "title": "昆明市",
+      "province": "云南省",
+      "city": "昆明市",
+      "date": "2026-02-11T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-11",
+      "kind": "place",
+      "title": "杭州市",
+      "province": "浙江省",
+      "city": "杭州市",
+      "date": "2026-03-12T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-12",
+      "kind": "place",
+      "title": "成都市",
+      "province": "四川省",
+      "city": "成都市",
+      "date": "2026-04-13T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-13",
+      "kind": "place",
+      "title": "广州市",
+      "province": "广东省",
+      "city": "广州市",
+      "date": "2026-05-14T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-14",
+      "kind": "place",
+      "title": "南京市",
+      "province": "江苏省",
+      "city": "南京市",
+      "date": "2026-06-15T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-15",
+      "kind": "place",
+      "title": "北京市",
+      "province": "北京市",
+      "city": "北京市",
+      "date": "2026-07-16T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-16",
+      "kind": "place",
+      "title": "上海市",
+      "province": "上海市",
+      "city": "上海市",
+      "date": "2026-08-17T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-17",
+      "kind": "place",
+      "title": "厦门市",
+      "province": "福建省",
+      "city": "厦门市",
+      "date": "2026-09-18T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-18",
+      "kind": "place",
+      "title": "武汉市",
+      "province": "湖北省",
+      "city": "武汉市",
+      "date": "2026-01-01T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-19",
+      "kind": "place",
+      "title": "西安市",
+      "province": "陕西省",
+      "city": "西安市",
+      "date": "2026-02-02T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-20",
+      "kind": "place",
+      "title": "昆明市",
+      "province": "云南省",
+      "city": "昆明市",
+      "date": "2026-03-03T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-21",
+      "kind": "place",
+      "title": "杭州市",
+      "province": "浙江省",
+      "city": "杭州市",
+      "date": "2026-04-04T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-22",
+      "kind": "place",
+      "title": "成都市",
+      "province": "四川省",
+      "city": "成都市",
+      "date": "2026-05-05T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-23",
+      "kind": "place",
+      "title": "广州市",
+      "province": "广东省",
+      "city": "广州市",
+      "date": "2026-06-06T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-24",
+      "kind": "place",
+      "title": "南京市",
+      "province": "江苏省",
+      "city": "南京市",
+      "date": "2026-07-07T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-25",
+      "kind": "place",
+      "title": "北京市",
+      "province": "北京市",
+      "city": "北京市",
+      "date": "2026-08-08T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-26",
+      "kind": "place",
+      "title": "上海市",
+      "province": "上海市",
+      "city": "上海市",
+      "date": "2026-09-09T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-27",
+      "kind": "place",
+      "title": "厦门市",
+      "province": "福建省",
+      "city": "厦门市",
+      "date": "2026-01-10T12:00:00",
+      "rating": 3,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-28",
+      "kind": "place",
+      "title": "武汉市",
+      "province": "湖北省",
+      "city": "武汉市",
+      "date": "2026-02-11T12:00:00",
+      "rating": 4,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-29",
+      "kind": "place",
+      "title": "西安市",
+      "province": "陕西省",
+      "city": "西安市",
+      "date": "2026-03-12T12:00:00",
+      "rating": 5,
+      "amount": 1
+    },
+    {
+      "id": "fiction-place-30",
+      "kind": "place",
+      "title": "昆明市",
+      "province": "云南省",
+      "city": "昆明市",
+      "date": "2026-04-13T12:00:00",
+      "rating": 3,
+      "amount": 1
+    }
+  ]
+}

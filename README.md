@@ -1,133 +1,112 @@
-<p align="center">
-  <img src="assets/images/app_icon.png" width="88" alt="归途 App 图标">
-</p>
+# 归途 · 百度贴吧 H5 版
 
-<h1 align="center">归途</h1>
-<p align="center"><b>读过的书，看过的电影，走过的地方。</b><br>把生活，慢慢归档。</p>
-<p align="center">免费开源的 Android 生活记录 App · 不登录 · 无广告 · 本地保存</p>
+**读过的书，看过的电影，走过的地方，把生活慢慢归档。**
 
-<p align="center">
-  <a href="https://github.com/SySH-7/guitu/releases/download/v0.3.1/guitu-v0.3.1-android-signed.apk"><img src="https://img.shields.io/badge/下载_Android-v0.3.1-2B6E38?style=for-the-badge&logo=android&logoColor=white" alt="下载 Android v0.3.1"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-111417?style=for-the-badge" alt="MIT License"></a>
-</p>
-<p align="center">
-  <a href="https://github.com/SySH-7/guitu/releases/tag/v0.3.1">版本说明</a> ·
-  <a href="#界面预览">界面预览</a> ·
-  <a href="#开始使用">开始使用</a> ·
-  <a href="https://github.com/SySH-7/guitu/issues">反馈与建议</a>
-</p>
+归途的百度贴吧小应用适配版，使用 HTML、CSS 和原生 JavaScript 实现，构建为可上传至贴吧开放平台的单个 HTML 文件。
 
-## 开始使用
+本分支为 `tieba-h5`；[Android 版源码和下载入口在 main 分支](https://github.com/SySH-7/guitu/tree/main)。H5 基于 Android **0.2.2** 的功能与备份格式重建，视觉参考 **0.3.1**，不包含安卓新版的拍照识别、相册导入等功能。
 
-1. [下载 Android v0.3.1 APK](https://github.com/SySH-7/guitu/releases/download/v0.3.1/guitu-v0.3.1-android-signed.apk)，或进入 [Release 页面](https://github.com/SySH-7/guitu/releases/tag/v0.3.1) 选择同名安装包。
-2. 安装并打开归途，无需注册账号。
-3. 底部 **＋** 手动新增阅读、影视或地点；右下角快捷入口用于封面识别与当前位置录入。
-4. 想补记过去的旅行，进入 **用户 → 相册批量导入地点**。想备份，使用 **用户 → 导出数据** 保存 JSON。
+## 当前状态
 
-公开安装包已内置省级 / 市级足迹地图。当前公开安装版本为 **Android**。
-
-## 0.3.1，让记录少一点手动输入
-
-归途将阅读、影视和旅途放在同一个本地档案里。用评分和备注留下感受，再通过书影统计与省级 / 市级足迹地图回顾自己的生活。
-
-| 新版功能 | 怎么用 |
-| --- | --- |
-| **拍封面，少打一遍名字** | 首页、书影或旅途页右下角打开快捷入口 → 拍照或选择封面 → 本地识别文字 → 确认作品名 → 预填阅读 / 影视表单。其他字段由你填写。 |
-| **到了就记，省市帮你填** | 快捷入口选择当前位置 → 主动授权定位 → 预填省市与时间 → 补充记录后保存。 |
-| **旧照片，也能找回旅途** | 用户页 → 相册批量导入地点 → 授权扫描 → 审核省市、到访日期和评分 → 确认导入。照片需要包含可用的 GPS 与拍摄时间。 |
-
-完整变更见 [v0.3.1 更新说明](RELEASE_NOTES_v0.3.1.md) 和 [更新日志](CHANGELOG.md)。
+- **已通过百度贴吧小应用审核**（开发者于 2026-10-20 确认）。审核通过不等同于已发布上线；本仓库暂不提供正式上线入口。
+- 对应平台版本：`v179215220644`。业务源码与该版本的本地留档一致；生产地图配置、私有城市坐标缓存及含这些内容的构建产物不公开。
+- [版本对应与源码校验](docs/version-reference.json) · [验证范围和已知限制](docs/verification.md)
 
 ## 界面预览
 
-下图使用 **0.3.1 原始 Flutter 界面与演示数据**生成，展示真实组件布局。设备响应由截图环境提供演示输入；相机、定位和照片权限以 Android 设备实际授权为准。截图说明见 [来源与生成方式](docs/screenshots/v0.3.1/README.md)。
+截图使用虚构数据与模拟平台服务，仅展示界面，不代表真实云端操作结果。
 
-| 首页与最近记录 | 书影统计 | 省级足迹 |
-| :---: | :---: | :---: |
-| <img src="docs/screenshots/v0.3.1/home.png" width="220" alt="归途 0.3.1 首页，阅读影视旅途概览与右下角快捷入口"> | <img src="docs/screenshots/v0.3.1/statistics.png" width="220" alt="书影月度统计与类型分布，演示数据"> | <img src="docs/screenshots/v0.3.1/travel-province.png" width="220" alt="归途 0.3.1 省级足迹地图与省份列表，演示数据"> |
+<p>
+  <img src="docs/screenshots/home-light.png" width="240" alt="归途首页">
+  <img src="docs/screenshots/books-light.png" width="240" alt="书影统计">
+  <img src="docs/screenshots/settings-light.png" width="240" alt="我的与备份入口">
+</p>
 
-| 作品名确认 | 相册结果审核 | 用户与数据管理 |
-| :---: | :---: | :---: |
-| <img src="docs/screenshots/v0.3.1/confirm-title.png" width="220" alt="封面识别后确认作品名称，演示候选文字"> | <img src="docs/screenshots/v0.3.1/photo-review.png" width="220" alt="相册扫描结果审核，确认后才导入，演示数据"> | <img src="docs/screenshots/v0.3.1/settings.png" width="220" alt="用户页相册批量导入地点、深色模式与 JSON 数据备份入口"> |
+## 已有功能
 
-## 功能与数据
+- **书籍与影视**：名称、作者或导演、分类、日期、数量与评分；按年份查看数量和类型统计。
+- **旅途足迹**：按省市记录地点，百度地图展示城市指针；地图独立手势开关、查看全图与页面间实例复用。
+- **记录管理**：搜索、编辑、删除；按日期倒序，首次 10 条，点击查看更多再追加 10 条。
+- **本机备份**：复制备份文本、粘贴导入；格式验证后合并，同 ID 本机内容优先。
+- **贴吧云端保存**：手动保存、查看摘要、下载合并、删除当前应用云存档；默认压缩和容量检查，读取失败时停止覆盖或删除。
+- **主题与布局**：深色模式、移动端安全区、窄屏与长标题适配。
 
-- **集中记录**：书籍、影视、地点，保存日期、评分、备注等信息。
-- **回顾与统计**：首页概览、月度 / 年度书影图表、类型分布、省级 / 市级足迹地图。
-- **快捷录入**：本地封面 OCR 确认作品名、当前位置省市预填、相册历史旅途审核导入。
-- **主题与备份**：浅色 / 深色模式，JSON 导出与导入。
-- **本地优先**：不要求注册，不包含广告、行为追踪或远程统计服务；记录默认保存在 Android 应用私有目录。
+书影名称限 60 字，作者/导演限 30 字。每周成功保存最多 5 次属于应用侧提醒与约束，并非不可绕过的服务端配额。上传前显示数据大小、第三方托管提醒与五秒确认。
 
-## 支持与反馈
+## 本地构建
 
-如果归途对你有用，欢迎在仓库右上角点一颗 **Star**，支持后续更新。也欢迎通过 [Issues](https://github.com/SySH-7/guitu/issues) 反馈问题或提出建议；报告问题时附上应用版本、Android 版本和复现步骤，方便定位。
-
-<details>
-<summary><b>开发与本地运行</b></summary>
-
-### 技术栈
-
-Flutter / Dart、Material 与 Cupertino 组件、CustomPainter 图表与足迹地图、MethodChannel Android 文件 / OCR / 定位 / 照片元数据能力、Flutter Test。
-
-### 环境与运行
-
-Flutter 3.24 或兼容版本、Dart 3.5 或兼容版本、Android SDK 和模拟器 / 设备。
+需要 Python 3.9+。构建使用的压缩库已内嵌，不需要下载运行时依赖：
 
 ```bash
-flutter pub get
-flutter doctor
-flutter run
+git clone --branch tieba-h5 --single-branch https://github.com/SySH-7/guitu.git
+cd guitu
+python3 build.py
 ```
 
-公开源码不包含第三方地图 GeoJSON。缺少地图数据时，旅途页显示“地图数据未配置”；阅读、影视、统计与 JSON 导入导出仍可使用。需要本地行政区边界数据的省市匹配功能也依赖兼容地图数据。配置说明见 [assets/data/README.md](assets/data/README.md)。
+输出为 `dist/guitu-tieba-0.2.2.html`。可先在浏览器查看界面；完整的身份和云存档功能需要部署到自己的贴吧小应用，普通网页预览无法替代贴吧 App 验收。
 
-### 验证与构建
+### 配置地图与平台
 
 ```bash
-flutter analyze
-flutter test
-flutter build apk --debug
+BAIDU_MAP_AK='你自己的浏览器端地图 AK' python3 build.py
 ```
 
-APK 输出位于 `build/app/outputs/flutter-apk/`。正式签名构建需在本机配置 `android/key.properties` 和私有 keystore。
+将生成的 HTML 上传至[贴吧开放平台](https://tieba.baidu.com/home/aiapps/home)，按[官方接入文档](https://tieba.baidu.com/home/aiapps/openH5Intro)配置并在贴吧 App 预览。SDK 由平台注入，不在普通网页中擅自模拟真实云端权限。
 
-### 目录
+浏览器端 AK 会随网页发送，不能当作服务端秘密；请在百度地图控制台为自己的部署域名设置 Referer 限制。本分支不提供项目生产 AK。未配置 AK 时仍可使用记录与备份功能，地图会提示配置未就绪。
+
+`src/city-points.json` 为 `{}` 占位文件，保留既有百度在线地址解析兜底；省会中心点仍可直接使用，其他城市首次定位依赖网络与地图权限。若有可合法使用的城市中心点缓存，可按 `{"省份|城市":[经度,纬度]}` 格式私下填入后重建。具体边界见 [第三方说明](THIRD_PARTY_NOTICES.md)。
+
+### 虚构数据预览
+
+```bash
+GUITU_INCLUDE_SAMPLES=1 python3 build.py
+```
+
+生成独立的 `dist/guitu-tieba-0.2.2-preview.html`，首次打开合并 90 条虚构记录，不自动上传云端。勿把带样例的预览文件当成正式包提交。跨 1999–2026 年的 200 条测试备份另见 `test/final-varied-archive.json`，导入后可观察分页和统计。
+
+## 测试
+
+需要 Node.js 22+；核心单元测试无需第三方 Node 依赖：
+
+```bash
+npm test
+```
+
+浏览器测试使用 Playwright，所有云端读写由测试替身拦截，不操作真实用户存档：
+
+```bash
+npm ci
+npx playwright install chromium webkit
+python3 build.py
+npm run test:smoke
+npm run test:cloud
+npm run test:guard
+npm run test:varied
+```
+
+Linux 系统可使用 `npx playwright install --with-deps chromium webkit` 安装浏览器所需依赖。若复用系统 Chrome，可设置 `GUITU_CHROMIUM_EXECUTABLE` 为其可执行文件路径。
+
+`test:guard` 会从百度官方域名下载并校验指定 SDK，仅用于本地隔离测试，不上传 SDK 源码。若官方内容改变而校验失败，应先核对新 SDK，再明确更新固定校验值。CI 自动检查构建、单元测试和模拟云端烟雾流程。
+
+## 数据与使用边界
+
+- 本机数据保存在网页浏览器存储中。清理 App 数据、换设备或改变网页来源可能导致记录无法读取，请自行备份。SDK 没有返回用户 ID 时只按当前会话临时保存。
+- 云端是贴吧小应用存档，不是百度网盘。保存不会删除本机数据；下载会合并记录；删除仅移除当前应用存档中的归途记录，不承诺抹除平台日志或历史备份。
+- 单次上传按编码后的整份载荷限制为 **30,000 字节**。这是应用的保守限制，不是百度公布的存储配额；超限会拒绝上传，不截断本机数据。
+- 云端读取保护依赖当前官方 SDK 的请求及返回格式；平台变更时可能暂停云端操作，需要核对后适配。本机记录和手动备份不依赖该云端服务。
+- 当前版本没有第三方自动内容审核服务，不应把免责声明或字数限制视为审核能力。请勿上传私人敏感信息或违规内容。
+- 源码、测试和文档由开发者与 AI 协作完成，主要功能经本地回归和贴吧端验收；自动化模拟不代表所有设备、网络和账号权限均已验证。
+
+## 目录
 
 ```text
-lib/
-├─ main.dart            # 入口、主题、全局装配
-├─ shell.dart           # 导航、新增与快捷入口
-├─ models/              # 记录与行政区模型
-├─ screens/             # 首页、书影、旅途、用户
-├─ services/            # 存储、设备能力与本地省市匹配
-├─ ui/                  # 表单、OCR 流程、相册审核、图表与地图
-└─ widgets/             # 通用组件
-
-docs/screenshots/       # 界面预览与来源说明
-test/                   # Widget 与数据测试
-android/                # 原生 Android 工程
+src/                   页面模板、样式、业务逻辑和基础省市目录
+vendor/                内嵌 pako 及许可证
+test/                  单元测试、模拟平台测试和虚构数据
+scripts/               测试 SDK 下载与校验
+docs/                  界面截图、版本对应和验证说明
+build.py               单 HTML 构建
 ```
 
-</details>
-
-<details>
-<summary><b>地图与第三方数据说明</b></summary>
-
-出于第三方数据授权与地图合规考虑，公开源码仓库不包含 `china_provinces.geojson` 和 `china_cities.geojson`。发布安装包可在不公开源数据文件的前提下内置地图数据，用于保证应用内省级/市级足迹地图正常展示。本地私有开发时可自行在 `assets/data/` 中配置兼容的 GeoJSON，相关说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
-
-本项目属于个人技术展示作品，不是官方地图产品，也不提供导航、定位、测绘或互联网地图服务。应用内足迹地图仅用于个人记录中的行政区划可视化统计，不作为行政边界认定或完整标准地图使用。源码仓库中的地图绘制代码只做屏幕适配所需的等比例渲染、填色和交互，不修改原始地图数据文件。公开传播地图数据、二次发布含地图的构建或商业使用前，使用者应自行确认地图审核、数据授权和其他合规要求。
-
-市级足迹地图优先使用天地图市级行政区划面数据。对于数据源中未提供独立市级面的直辖市、港澳台及部分省直管或特殊县级区域，应用使用同源省级行政区划面作为可视化兜底，以避免足迹区域空缺。
-
-</details>
-
-## 后续计划
-
-- 探索自接 API 的 AI 功能。
-- 持续优化功能展示与使用体验。
-
-以上为后续方向，尚不属于当前 Android 0.3.1 的功能。
-
-## 开源许可
-
-除第三方地图数据外，项目代码采用 [MIT License](LICENSE) 开源。
+项目自有代码使用 [MIT License](LICENSE)。百度地图、贴吧 SDK 和外部数据的使用条件分别适用，不包含在本项目的授权中。问题反馈请使用 [GitHub Issues](https://github.com/SySH-7/guitu/issues)，注明“贴吧 H5 版”。
