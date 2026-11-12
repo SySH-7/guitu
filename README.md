@@ -31,7 +31,7 @@
 
 归途 AI 可根据已有书籍、影视与地点记录回答问题，生成年度总结和近期分析，并推荐书籍、影视或地点。各功能需要主动点击生成。
 
-在用户页配置 DeepSeek、Kimi、GLM、Claude、GPT、Gemini、Qwen、Grok 或自定义 OpenAI 兼容接口，填写自己的 API 密钥并测试连接。**使用时相关记录会发送至所选服务商，可能产生服务费用**；测试连接也会发送一条简短消息。Android 6 及以上可使用 AI 配置，配置单独加密保存，不包含在归途数据导出中。AI 生成内容可能有误，请自行核对。
+在用户页配置 DeepSeek、Kimi、GLM、Claude、GPT、Gemini、Qwen、Grok 或自定义 OpenAI 兼容接口，填写自己的 API 密钥并测试连接。Android 6 及以上可使用 AI 配置，配置单独加密保存，不包含导出中。
 
 ## 快捷记录
 
