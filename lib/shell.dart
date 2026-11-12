@@ -274,6 +274,12 @@ class _ArchiveShellState extends State<ArchiveShell> {
                   setState(() => _quickEntryExpanded = false);
                   await _openQuickLocationEntry();
                 },
+                onAi: () {
+                  setState(() => _quickEntryExpanded = false);
+                  Navigator.of(context).push(MaterialPageRoute<void>(
+                    builder: (_) => AiScreen(store: widget.store),
+                  ));
+                },
               ),
             ),
         ],
@@ -326,12 +332,14 @@ class _QuickEntryFab extends StatelessWidget {
     required this.onToggle,
     required this.onCover,
     required this.onLocation,
+    required this.onAi,
   });
 
   final bool expanded;
   final VoidCallback onToggle;
   final VoidCallback onCover;
   final VoidCallback onLocation;
+  final VoidCallback onAi;
 
   @override
   Widget build(BuildContext context) {
@@ -368,16 +376,37 @@ class _QuickEntryFab extends StatelessWidget {
                 )
               : const SizedBox.shrink(),
         ),
-        _QuickFabCircle(
-          tooltip: expanded ? '收起快捷录入' : '快捷录入',
-          icon: expanded ? CupertinoIcons.xmark : CupertinoIcons.ellipsis,
-          foreground: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFF171A18)
-              : Colors.white,
-          background: Theme.of(context).brightness == Brightness.dark
-              ? const Color(0xFFECEFED)
-              : const Color(0xFF171A18),
-          onTap: onToggle,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            AnimatedSize(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOutCubic,
+              child: expanded
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: _QuickFabCircle(
+                        tooltip: 'AI 助手',
+                        icon: CupertinoIcons.sparkles,
+                        foreground: Colors.white,
+                        background: archiveGreen,
+                        onTap: onAi,
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            _QuickFabCircle(
+              tooltip: expanded ? '收起快捷录入' : '快捷录入',
+              icon: expanded ? CupertinoIcons.xmark : CupertinoIcons.ellipsis,
+              foreground: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFF171A18)
+                  : Colors.white,
+              background: Theme.of(context).brightness == Brightness.dark
+                  ? const Color(0xFFECEFED)
+                  : const Color(0xFF171A18),
+              onTap: onToggle,
+            ),
+          ],
         ),
       ],
     );

@@ -642,22 +642,26 @@ class _EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return _SectionCard(
       title: '',
-      child: Column(
-        children: <Widget>[
-          Image.asset('assets/images/app_icon.png', width: 72, height: 72),
-          const SizedBox(height: 10),
-          Text('还没有记录',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium
-                  ?.copyWith(fontWeight: FontWeight.w700)),
-          const SizedBox(height: 8),
-          Text('把一本书、一部电影或一次抵达放进时间里。',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 14),
-          FilledButton(onPressed: onAdd, child: const Text('开始记录')),
-        ],
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Image.asset('assets/images/app_icon.png', width: 72, height: 72),
+            const SizedBox(height: 10),
+            Text('还没有记录',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Text('把一本书、一部电影或一次抵达放进时间里。',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 14),
+            FilledButton(onPressed: onAdd, child: const Text('开始记录')),
+          ],
+        ),
       ),
     );
   }

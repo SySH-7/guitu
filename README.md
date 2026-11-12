@@ -7,11 +7,11 @@
 <p align="center">免费开源的 Android 生活记录 App · 不登录 · 无广告 · 本地保存</p>
 
 <p align="center">
-  <a href="https://github.com/SySH-7/guitu/releases/download/v0.3.1/guitu-v0.3.1-android-signed.apk"><img src="https://img.shields.io/badge/下载_Android-v0.3.1-2B6E38?style=for-the-badge&logo=android&logoColor=white" alt="下载 Android v0.3.1"></a>
+  <a href="https://github.com/SySH-7/guitu/releases/download/v0.4.1/guitu-v0.4.1-android-signed.apk"><img src="https://img.shields.io/badge/下载_Android-v0.4.1-2B6E38?style=for-the-badge&logo=android&logoColor=white" alt="下载 Android v0.4.1"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-111417?style=for-the-badge" alt="MIT License"></a>
 </p>
 <p align="center">
-  <a href="https://github.com/SySH-7/guitu/releases/tag/v0.3.1">版本说明</a> ·
+  <a href="https://github.com/SySH-7/guitu/releases/tag/v0.4.1">版本说明</a> ·
   <a href="#界面预览">界面预览</a> ·
   <a href="#开始使用">开始使用</a> ·
   <a href="https://github.com/SySH-7/guitu/issues">反馈与建议</a>
@@ -19,14 +19,22 @@
 
 ## 开始使用
 
-1. [下载 Android v0.3.1 APK](https://github.com/SySH-7/guitu/releases/download/v0.3.1/guitu-v0.3.1-android-signed.apk)，或进入 [Release 页面](https://github.com/SySH-7/guitu/releases/tag/v0.3.1) 选择同名安装包。
+1. [下载 Android v0.4.1 APK](https://github.com/SySH-7/guitu/releases/download/v0.4.1/guitu-v0.4.1-android-signed.apk)，或进入 [Release 页面](https://github.com/SySH-7/guitu/releases/tag/v0.4.1) 选择同名安装包。
 2. 安装并打开归途，无需注册账号。
 3. 底部 **＋** 手动新增阅读、影视或地点；右下角快捷入口用于封面识别与当前位置录入。
-4. 想补记过去的旅行，进入 **用户 → 相册批量导入地点**。想备份，使用 **用户 → 导出数据** 保存 JSON。
+4. 在 **用户 → AI 助手设置**配置服务商、模型与 API 密钥，测试连接并保存；在首页、书影或旅途的快捷入口打开 AI 助手，按需使用。
+5. 想补记过去的旅行，进入 **用户 → 相册批量导入地点**。想备份，使用 **用户 → 导出数据** 保存 JSON。
 
 公开安装包已内置省级 / 市级足迹地图。当前公开安装版本为 **Android**。
 
-## 0.3.1，让记录少一点手动输入
+## 0.4.1，让 AI 帮你回顾生活
+
+归途 AI 可根据已有书籍、影视与地点记录回答问题，生成年度总结和近期分析，并推荐书籍、影视或地点。各功能需要主动点击生成。
+
+在用户页配置 DeepSeek、Kimi、GLM、Claude、GPT、Gemini、Qwen、Grok 或自定义 OpenAI 兼容接口，填写自己的 API 密钥并测试连接。**使用时相关记录会发送至所选服务商，可能产生服务费用**；测试连接也会发送一条简短消息。Android 上配置单独加密保存，不包含在归途数据导出中。AI 生成内容可能有误，请自行核对。
+
+## 快捷记录
+
 
 归途将阅读、影视和旅途放在同一个本地档案里。用评分和备注留下感受，再通过书影统计与省级 / 市级足迹地图回顾自己的生活。
 
@@ -36,7 +44,7 @@
 | **到了就记，省市帮你填** | 快捷入口选择当前位置 → 主动授权定位 → 预填省市与时间 → 补充记录后保存。 |
 | **旧照片，也能找回旅途** | 用户页 → 相册批量导入地点 → 授权扫描 → 审核省市、到访日期和评分 → 确认导入。照片需要包含可用的 GPS 与拍摄时间。 |
 
-完整变更见 [v0.3.1 更新说明](RELEASE_NOTES_v0.3.1.md) 和 [更新日志](CHANGELOG.md)。
+完整变更见 [v0.4.1 更新说明](RELEASE_NOTES_v0.4.1.md) 和 [更新日志](CHANGELOG.md)。
 
 ## 界面预览
 
@@ -52,6 +60,7 @@
 
 ## 功能与数据
 
+- **AI 助手**：基于记录提问、年度总结、近期分析和随机或指定类别推荐；需要自行配置服务商和 API 密钥。
 - **集中记录**：书籍、影视、地点，保存日期、评分、备注等信息。
 - **回顾与统计**：首页概览、月度 / 年度书影图表、类型分布、省级 / 市级足迹地图。
 - **快捷录入**：本地封面 OCR 确认作品名、当前位置省市预填、相册历史旅途审核导入。
@@ -71,7 +80,7 @@ Flutter / Dart、Material 与 Cupertino 组件、CustomPainter 图表与足迹�
 
 ### 环境与运行
 
-Flutter 3.24 或兼容版本、Dart 3.5 或兼容版本、Android SDK 和模拟器 / 设备。
+Flutter 3.47 或兼容版本、Dart 3.13 或兼容版本、Android SDK 和模拟器 / 设备。
 
 ```bash
 flutter pub get

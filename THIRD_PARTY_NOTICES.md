@@ -21,3 +21,7 @@
 - [《地图管理条例》](https://www.gov.cn/gongbao/content/2016/content_5033856.htm)
 - [自然资源部标准地图服务系统](https://bzdt.ch.mnr.gov.cn/)
 - [《公开地图内容表示规范》](https://www.mfa.gov.cn/web/wjb_673085/zzjg_673183/bjhysws_674671/bhflfg/dtdmxgfl/202303/P020230313585504979937.pdf)
+
+## GitHub 标识
+
+GitHub Invertocat 图标来自 [Primer Octicons](https://github.com/primer/octicons/blob/main/icons/mark-github-24.svg)，以 MIT License 发布；GitHub 标识使用须遵守 [GitHub 品牌指南](https://brand.github.com/foundations/logo)。

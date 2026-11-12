@@ -59,7 +59,18 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 28),
-          const _SectionHeader(title: '最近记录'),
+          if (recent.isEmpty)
+            Center(
+              child: Text(
+                '最近记录',
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+            )
+          else
+            const _SectionHeader(title: '最近记录'),
           const SizedBox(height: 10),
           if (recent.isEmpty)
             _EmptyState(onAdd: onAdd)

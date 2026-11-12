@@ -15,6 +15,15 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import android.util.AtomicFile
+import android.util.Base64
+import java.security.KeyStore
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 import androidx.exifinterface.media.ExifInterface
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
@@ -64,6 +73,46 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "guitu/app_info").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "version" -> result.success(packageManager.getPackageInfo(packageName, 0).versionName)
+                "openLink" -> {
+                    val url = call.argument<String>("url")
+                    if (url != "https://github.com/SySH-7/guitu" && url != "https://github.com/SySH-7/guitu/releases/latest") {
+                        result.error("INVALID_URL", "无法打开此链接", null)
+                    } else try {
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                        result.success(null)
+                    } catch (_: Exception) {
+                        result.error("OPEN_FAILED", "无法打开浏览器", null)
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "guitu/ai_config").setMethodCallHandler { call, result ->
+            try {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                    result.error("AI_UNSUPPORTED", "AI 配置需要 Android 6.0 或更高版本", null)
+                    return@setMethodCallHandler
+                }
+                when (call.method) {
+                    "read" -> result.success(readAiConfig())
+                    "clear" -> {
+                        AtomicFile(File(noBackupFilesDir, "ai_config.enc")).delete()
+                        result.success(null)
+                    }
+                    "write" -> {
+                        val data = call.argument<String>("data") ?: throw IllegalArgumentException("Missing configuration")
+                        writeAiConfig(data)
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            } catch (error: Exception) {
+                result.error("AI_CONFIG_ERROR", "无法读写加密 AI 配置", null)
+            }
+        }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName).setMethodCallHandler { call, result ->
             when (call.method) {
                 "readSnapshot" -> readSnapshot(result)
@@ -102,6 +151,47 @@ class MainActivity : FlutterActivity() {
                     }
                 }
             })
+    }
+
+    // The key stays in Android Keystore; neither ciphertext nor key is included
+    // in the archive export or Android backup.
+    private fun aiKey(): SecretKey {
+        val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        val alias = "guitu_ai_config_key"
+        val existing = store.getKey(alias, null) as? SecretKey
+        if (existing != null) return existing
+        val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
+        generator.init(KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+            .build())
+        return generator.generateKey()
+    }
+
+    private fun writeAiConfig(data: String) {
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, aiKey())
+        val encrypted = cipher.iv + cipher.doFinal(data.toByteArray(Charsets.UTF_8))
+        val file = AtomicFile(File(noBackupFilesDir, "ai_config.enc"))
+        val stream = file.startWrite()
+        try {
+            stream.write(Base64.encode(encrypted, Base64.NO_WRAP))
+            file.finishWrite(stream)
+        } catch (error: Exception) {
+            file.failWrite(stream)
+            throw error
+        }
+    }
+
+    private fun readAiConfig(): String? {
+        val file = AtomicFile(File(noBackupFilesDir, "ai_config.enc"))
+        // AtomicFile may need to restore the legacy backup after an interrupted write.
+        if (!file.baseFile.exists() && !File(noBackupFilesDir, "ai_config.enc.bak").exists()) return null
+        val encrypted = Base64.decode(file.readFully(), Base64.NO_WRAP)
+        require(encrypted.size > 12)
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.DECRYPT_MODE, aiKey(), GCMParameterSpec(128, encrypted.copyOfRange(0, 12)))
+        return String(cipher.doFinal(encrypted.copyOfRange(12, encrypted.size)), Charsets.UTF_8)
     }
 
     private fun readSnapshot(result: MethodChannel.Result) {

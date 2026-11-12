@@ -25,6 +25,13 @@ class SettingsScreen extends StatelessWidget {
                 onChanged: store.setDarkMode),
           ),
           _SettingTile(
+            icon: CupertinoIcons.chat_bubble_2,
+            title: 'AI 助手设置',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const AiSettingsScreen()),
+            ),
+          ),
+          _SettingTile(
             icon: CupertinoIcons.photo_on_rectangle,
             title: '相册批量导入地点',
             onTap: () => PhotoTripDiscovery.start(context, store),
@@ -234,34 +241,7 @@ class SettingsScreen extends StatelessWidget {
   void _showAppInfo(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          icon:
-              Image.asset('assets/images/app_icon.png', width: 58, height: 58),
-          title: const Text('归途'),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text('归途\nv0.3.1\n开发者：SySH'),
-              SizedBox(height: 12),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _GithubMark(size: 18),
-                  SizedBox(width: 8),
-                  Text('Github：SySH-7/guitu'),
-                ],
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('知道了')),
-          ],
-        );
-      },
+      builder: (_) => const _AppInfoDialog(),
     );
   }
 
@@ -299,63 +279,124 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
+class _AppInfoDialog extends StatefulWidget {
+  const _AppInfoDialog();
+  @override
+  State<_AppInfoDialog> createState() => _AppInfoDialogState();
+}
+
+class _AppInfoDialogState extends State<_AppInfoDialog> {
+  final _updates = UpdateService();
+  String? _version;
+  String? _message;
+  bool _checking = false;
+  bool _updateAvailable = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _updates.currentVersion().then((value) {
+      if (mounted) setState(() => _version = value);
+    }).catchError((_) {
+      if (mounted) setState(() => _version = '未知');
+    });
+  }
+
+  Future<void> _open(String url) async {
+    try {
+      await _updates.openLink(url);
+    } catch (_) {
+      if (mounted) setState(() => _message = '无法打开浏览器，请检查设备设置。');
+    }
+  }
+
+  Future<void> _check() async {
+    setState(() {
+      _checking = true;
+      _message = null;
+      _updateAvailable = false;
+    });
+    try {
+      final current = await _updates.currentVersion();
+      final latest = await _updates.latestVersion();
+      final comparison = UpdateService.compare(current, latest);
+      if (!mounted) return;
+      setState(() {
+        _version = current;
+        _updateAvailable = comparison < 0;
+        _message = comparison < 0
+            ? '发现新版本 $latest，可前往 GitHub 下载更新。'
+            : comparison == 0
+                ? '已是最新版，无需更新。'
+                : '当前版本高于 GitHub 最新发布版本。';
+      });
+    } catch (_) {
+      if (mounted) setState(() => _message = '检查失败，请检查网络后重试。');
+    } finally {
+      if (mounted) setState(() => _checking = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+        icon: Image.asset('assets/images/app_icon.png', width: 58, height: 58),
+        title: const Text('归途'),
+        content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('归途\nv${_version ?? '…'}\n开发者：SySH'),
+              const SizedBox(height: 12),
+              Text('用 AI 回顾书影与旅途，提问、总结并发现新灵感。',
+                  style: Theme.of(context).textTheme.bodyMedium),
+              const SizedBox(height: 12),
+              InkWell(
+                onTap: () => _open(UpdateService.repositoryUrl),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const _GithubMark(size: 18),
+                  const SizedBox(width: 8),
+                  Flexible(
+                      child: Text('GitHub：SySH-7/guitu',
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              decoration: TextDecoration.underline))),
+                ]),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                  onPressed: _checking ? null : _check,
+                  icon: const Icon(CupertinoIcons.arrow_clockwise, size: 18),
+                  label: Text(_checking ? '正在检查…' : '检查更新')),
+              if (_message != null)
+                Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(_message!)),
+              if (_updateAvailable)
+                TextButton(
+                    onPressed: () => _open(UpdateService.releasesUrl),
+                    child: const Text('前往 GitHub 下载')),
+            ]),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('知道了'))
+        ],
+      );
+}
+
 class _GithubMark extends StatelessWidget {
   const _GithubMark({required this.size});
 
   final double size;
 
   @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size.square(size),
-      painter:
-          _GithubMarkPainter(color: Theme.of(context).colorScheme.onSurface),
-    );
-  }
-}
-
-class _GithubMarkPainter extends CustomPainter {
-  const _GithubMarkPainter({required this.color});
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    final Path head = Path()
-      ..moveTo(size.width * 0.22, size.height * 0.43)
-      ..lineTo(size.width * 0.20, size.height * 0.20)
-      ..lineTo(size.width * 0.39, size.height * 0.29)
-      ..quadraticBezierTo(
-        size.width * 0.50,
-        size.height * 0.24,
-        size.width * 0.61,
-        size.height * 0.29,
-      )
-      ..lineTo(size.width * 0.80, size.height * 0.20)
-      ..lineTo(size.width * 0.78, size.height * 0.43)
-      ..quadraticBezierTo(
-        size.width * 0.88,
-        size.height * 0.76,
-        size.width * 0.50,
-        size.height * 0.86,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.12,
-        size.height * 0.76,
-        size.width * 0.22,
-        size.height * 0.43,
-      )
-      ..close();
-    canvas.drawPath(head, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _GithubMarkPainter oldDelegate) {
-    return oldDelegate.color != color;
-  }
+  Widget build(BuildContext context) => Image.asset(
+        'assets/images/github_mark.png',
+        width: size,
+        height: size,
+        color: Theme.of(context).colorScheme.onSurface,
+        semanticLabel: 'GitHub',
+      );
 }
 
 class _ProfileHeader extends StatelessWidget {
